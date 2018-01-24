@@ -2,7 +2,7 @@
 pymkv is a Python wrapper for mkvmerge, a part of the MKVToolNix suite. It currently provides support for muxing separate track files together into a single MKV file.
 
 
-# MKVObject
+## MKVObject
 The MKVObject class is the core class of pymkv. This class recieves Track objects and muxes them together.
 
 The only required argument is the path to the output file. An MKVObject can be created using the MKVObject class:
@@ -15,14 +15,14 @@ An optional title arguments can be included to set the internal name of the file
 mkv = MKVObject('path/to/output/file.mkv', title='Some Name Here')
 ```
 
-## Functions
-### command()
+### Functions
+#### command()
 The command function uses the provided tracks and data to generate the relative mkvmerge command. This does not execute the command but only generates the command string.
 
-### mux()
+#### mux()
 The mux function runs the command function and then executes the command using subprocess.run(). This functionality only works when mkvmerge has been added to your $PATH variable.
 
-### add_track(track)
+#### add_track(track)
 The add_track function is used to add a track to te MKVObject. The track object is provided as an argument. The order in which the tracks are added is the same order that they will be in the MKV file. More info on creating tracks is available in the Tracks section.
 
 Example:
@@ -35,7 +35,7 @@ mkv.add_track(audio)
 ```
 
 
-# Tracks
+## Tracks
 Tracks are embodied by the Track class or any of its specific subclasses.  In order to mux tracks together, you must create track instantiations and pass them to an MKVObject.
 
 The only required argument is the path to the track file. A generic track can be created using the Track class:
