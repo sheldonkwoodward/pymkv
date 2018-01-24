@@ -2,26 +2,27 @@ import subprocess as sp
 
 
 class Track:
-    def __init__(self, path, title=None, language=None, default=None, forced=None):
+    def __init__(self, path, title=None, language=None, default=False, forced=False):
         self.path = path
         self.title = title
+        # TODO: check for valid language code
         self.language = language
         self.default = default
         self.forced = forced
 
 
 class VideoTrack(Track):
-    def __init__(self, path, title=None, language=None, default=None, forced=None):
+    def __init__(self, path, title=None, language=None, default=False, forced=False):
         super().__init__(path, title, language, default, forced)
 
 
 class AudioTrack(Track):
-    def __init__(self, path, title=None, language=None, default=None, forced=None):
+    def __init__(self, path, title=None, language=None, default=False, forced=False):
         super().__init__(path, title, language, default, forced)
 
 
 class SubtitleTrack(Track):
-    def __init__(self, path, title=None, language=None, default=None, forced=None):
+    def __init__(self, path, title=None, language=None, default=False, forced=False):
         super().__init__(path, title, language, default, forced)
 
 
@@ -45,6 +46,12 @@ class MKVObject:
         for track in self.tracks:
             if track.title:
                 command.extend(['--track-name', '0:' + track.title])
+            if track.language:
+                command.extend(['--language', '0:' + track.language])
+            if track.default:
+                command.extend(['--default-track', '0:1'])
+            if track.forced:
+                command.extend(['--forced-track', '0:1'])
             command.append(track.path)
 
         return command
