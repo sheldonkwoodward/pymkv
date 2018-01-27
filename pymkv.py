@@ -27,6 +27,7 @@ class SubtitleTrack(Track):
 
 
 class MKVObject:
+    # TODO: add optional track arguments
     def __init__(self, output_file, title=None):
         # initial values
         self.output_file = output_file
@@ -34,7 +35,7 @@ class MKVObject:
         self.tracks = []
 
     # execution
-    def command(self):
+    def command(self, subprocess=False):
         # setup command
         command = ['mkvmerge', '-o', self.output_file]
 
@@ -54,11 +55,14 @@ class MKVObject:
                 command.extend(['--forced-track', '0:1'])
             command.append(track.path)
 
-        return command
+        if subprocess:
+            return command
+        return " ".join(command)
 
     def mux(self):
         command = self.command()
         print('Running with command:\n"' + " ".join(command) + '"')
+        # TODO: add silent option to command exeecution
         sp.run(command)
 
     # creation
