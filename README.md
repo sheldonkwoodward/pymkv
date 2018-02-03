@@ -20,7 +20,7 @@ MKVFiles also have two optional arguments:
 
 Example:
 ```
-track = Track('path/to/track.h264', track_id=0, default_track=True, forced_track=False, language='eng', track_name='A cool new track')
+file = MKVFile(path='path/to/file.mkv', title='Some title')
 ```
 
 ### Functions
@@ -91,7 +91,7 @@ MKV tracks are embodied by the Track class. In order to mux tracks together, you
 
 The only required argument to create a track is the path to the track file:
 ```
-track = Track('path/to/track.h264')
+track = MKVTrack('path/to/track.h264')
 ```
 
 MKVTracks also have five optional arguments:
@@ -108,5 +108,5 @@ MKVTracks also have five optional arguments:
 
 Example:
 ```
-track = Track('path/to/track.h264', track_id=0, default_track=True, forced_track=False, language='eng', track_name='A cool new track')
+track = MKVTrack('path/to/track.h264', track_id=0, default_track=True, forced_track=False, language='eng', track_name='A cool new track')
 ```
