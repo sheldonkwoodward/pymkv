@@ -3,26 +3,28 @@ import json
 
 
 class MKVTrack:
-    def __init__(self, path, track_id, default_track=False, forced_track=False, language='eng', track_name=None):
+    def __init__(self, path, track_id=0, default_track=False, forced_track=False, language='eng', track_name=None):
+        self.mkvmerge_path = 'mkvmerge'
         self.path = path
         self.default_track = default_track
         self.forced_track = forced_track
         self.language = language
         self.track_id = track_id
         self.track_name = track_name
-        info_json = json.loads(sp.check_output(['mkvmerge', '-J', self.path]).decode('utf8'))
+        info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.path]).decode('utf8'))
         self.track_type = info_json['tracks'][track_id]['type']
 
 
 class MKVFile:
-    def __init__(self, path=None):
+    def __init__(self, path=None, title=None):
+        self.mkvmerge_path = 'mkvmerge'
         self.path = path
-        self.title = None
+        self.title = title
         self.tracks = []
         if path:
             # add file title
-            info_json = json.loads(sp.check_output(['mkvmerge', '-J', self.path]).decode('utf8'))
-            if 'title' in info_json['container']['properties']:
+            info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.path]).decode('utf8'))
+            if not self.title and 'title' in info_json['container']['properties']:
                 self.title = info_json['container']['properties']['title']
 
             # add tracks with info
@@ -39,7 +41,7 @@ class MKVFile:
                 self.add_track(new_track)
 
     def command(self, output_file, subprocess=False):
-        command = ['mkvmerge', '-o', output_file]
+        command = [self.mkvmerge_path, '-o', output_file]
         if self.title:
             command.extend(['--title', self.title])
         # add tracks
@@ -82,22 +84,6 @@ class MKVFile:
             command = self.command(output_file)
             print('Running with command:\n"' + command + '"')
             sp.run(self.command(output_file, subprocess=True))
-
-    def print_info(self):
-        if self.title:
-            print('Title: ' + self.title + '\n')
-        for track in self.tracks:
-            print('\n')
-            if track.default_track is not None:
-                print('Default Track: ' + str(track.default_track))
-            if track.forced_track is not None:
-                print('Forced Track: ' + str(track.forced_track))
-            if track.language is not None:
-                print('Language: ' + track.language)
-            if track.track_id is not None:
-                print('ID: ' + str(track.track_id))
-            if track.track_name is not None:
-                print('Track Name: ' + track.track_name)
 
     def add_track(self, track):
         self.tracks.append(track)
