@@ -5,7 +5,6 @@ import json
 class MKVTrack:
     def __init__(self, path, track_id, default_track=False, forced_track=False, language='eng', track_name=None):
         self.path = path
-        self.info_json = json.loads(sp.check_output(['mkvmerge', '-J', self.path]).decode('utf8'))
         self.default_track = default_track
         self.forced_track = forced_track
         self.language = language
@@ -21,6 +20,7 @@ class MKVFile:
         self.title = None
         self.tracks = []
         if path:
+            # add file title
             info_json = json.loads(sp.check_output(['mkvmerge', '-J', self.path]).decode('utf8'))
             if 'title' in info_json['container']['properties']:
                 self.title = info_json['container']['properties']['title']
@@ -40,7 +40,6 @@ class MKVFile:
 
     def command(self, output_file, subprocess=False):
         command = ['mkvmerge', '-o', output_file]
-        # universal attributes
         if self.title:
             command.extend(['--title', self.title])
         # add tracks
@@ -76,11 +75,13 @@ class MKVFile:
             return command
         return " ".join(command)
 
-    def mux(self, output_file):
-        command = self.command(output_file)
-        print('Running with command:\n"' + command + '"')
-        # TODO: add silent option to command execution
-        sp.run(self.command(output_file, subprocess=True))
+    def mux(self, output_file, silent=False):
+        if silent:
+            sp.check_output(self.command(output_file, subprocess=True))
+        else:
+            command = self.command(output_file)
+            print('Running with command:\n"' + command + '"')
+            sp.run(self.command(output_file, subprocess=True))
 
     def print_info(self):
         if self.title:
@@ -105,4 +106,25 @@ class MKVFile:
         self.tracks = self.tracks + file.tracks
 
     def remove_track(self, track_num):
-        del self.tracks[track_num]
+        if 0 <= track_num < len(self.tracks):
+            del self.tracks[track_num]
+
+    def move_track_front(self, track_num):
+        if 0 <= track_num < len(self.tracks):
+            self.tracks.insert(0, self.tracks.pop(self.tracks[track_num]))
+
+    def move_track_end(self, track_num):
+        if 0 <= track_num < len(self.tracks):
+            self.tracks.append(self.tracks.pop(self.tracks[track_num]))
+
+    def move_track_forward(self, track_num):
+        if 0 <= track_num < len(self.tracks) - 1:
+            self.tracks[track_num], self.tracks[track_num + 1] = self.tracks[track_num + 1], self.tracks[track_num]
+
+    def move_track_backward(self, track_num):
+        if 0 < track_num < len(self.tracks):
+            self.tracks[track_num], self.tracks[track_num - 1] = self.tracks[track_num - 1], self.tracks[track_num]
+
+    def swap_tracks(self, track_num_1, track_num_2):
+        if 0 <= track_num_1 < len(self.tracks) and 0 <= track_num_2 < len(self.tracks):
+            self.tracks[track_num_1], self.tracks[track_num_2] = self.tracks[track_num_2], self.tracks[track_num_1]
