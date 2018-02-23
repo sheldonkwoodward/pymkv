@@ -1,7 +1,15 @@
 # pymkv
 pymkv is a Python wrapper for mkvmerge. It provides support for muxing tracks together, combining multiple MKV files, reordering tracks, naming tracks, and other MKV related things.
 
-The only requirement is to have mkvmerge downloaded or installed on your computer. It is recommended to add it to your $PATH variable but a different path can be manually specified.
+
+## Installation
+mkvmerge must be downloaded or installed on your computer. It is recommended to add it to your $PATH variable but a different path can be manually specified. mkvmerge can be found and downloaded from [here](https://mkvtoolnix.download/downloads.html).
+
+To install pymkv using pip, run the following command in the projects root:
+```
+pip install .
+```
+The `-e` flag can be used during installation for code changes to updated automatically in pip.
 
 
 ## MKVFile
