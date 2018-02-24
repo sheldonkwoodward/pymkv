@@ -6,16 +6,27 @@ import json
 
 
 class MKVTrack:
-    def __init__(self, path, track_id=0, default_track=False, forced_track=False, language='eng', track_name=None):
+    def __init__(self, path, default_track=False, forced_track=False, language='eng', track_name=None):
+        """An object that represents an MKV track such as video, audio, or subtitles.
+
+        Args:
+            path (str): Path to the track file.
+            default_track (bool, optional): Determines if the track should be the default track of its type when muxed into
+                an MKV file.
+            forced_track (bool, optional): Determines if the track should be a forced track when muxed into an MKV file.
+            language (str, optional): The language of the track. It must follow the guidelines specified here:
+                www.matroska.org/technical/specs/index.html#languages
+            track_name (str, optional): The name that will be given to the track when muxed into a file.
+        """
         self.mkvmerge_path = 'mkvmerge'
         self.path = path
         self.default_track = default_track
         self.forced_track = forced_track
         self.language = language
-        self.track_id = track_id
+        self.track_id = 0
         self.track_name = track_name
         info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.path]).decode('utf8'))
-        self.track_type = info_json['tracks'][track_id]['type']
+        self.track_type = info_json['tracks'][self.track_id]['type']
 
 
 class MKVFile:
@@ -32,7 +43,8 @@ class MKVFile:
 
             # add tracks with info
             for track in info_json['tracks']:
-                new_track = MKVTrack(path=self.path, track_id=track['id'])
+                new_track = MKVTrack(path=self.path)
+                new_track.track_id = track['id']
                 if 'default_track' in track['properties']:
                     new_track.default_track = track['properties']['default_track']
                 if 'forced_track' in track['properties']:

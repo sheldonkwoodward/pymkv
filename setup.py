@@ -20,7 +20,7 @@ setup(
     url='https://github.com/sheldonkwoodward/pymkv',
     author='Sheldon Woodward',
     author_email='admin@sheldonw.com',
-    license='UNLICENSE',
+    license='MIT',
     packages=['pymkv'],
     classifiers=[
         'Intended Audience :: Developers',
