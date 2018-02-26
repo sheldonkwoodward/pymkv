@@ -15,7 +15,8 @@ with open(join(this_dir, 'README.md'), encoding='utf-8') as file:
 setup(
     name='pymkv',
     version=__version__,
-    description='A Python wrapper for mkvmerge. It provides support for muxing tracks together, combining multiple MKV files, reordering tracks, naming tracks, and other MKV related things..',
+    description='A Python wrapper for mkvmerge. It provides support for muxing tracks together, combining multiple '
+                'MKV files, reordering tracks, naming tracks, and other MKV related things.',
     long_description=long_description,
     url='https://github.com/sheldonkwoodward/pymkv',
     author='Sheldon Woodward',
