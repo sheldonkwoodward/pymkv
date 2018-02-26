@@ -1,4 +1,7 @@
-"""Packaging settings."""
+# sheldon woodward
+# 2/25/18
+
+"""Setuptools File"""
 
 from codecs import open
 from os.path import abspath, dirname, join
