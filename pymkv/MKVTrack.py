@@ -9,7 +9,7 @@ from os.path import expanduser
 
 
 class MKVTrack:
-    def __init__(self, path, default_track=False, forced_track=False, language='eng', track_name=None):
+    def __init__(self, path, default_track=False, forced_track=False, language='und', track_name=None):
         """An class that represents an MKV track such as video, audio, or subtitles.
 
         MKVTracks can be added to an MKVFile. MKVTracks can be video, audio, or subtitle tracks. The only required
