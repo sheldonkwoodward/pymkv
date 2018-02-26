@@ -3,7 +3,6 @@
 
 """Setuptools File"""
 
-from codecs import open
 from os.path import abspath, dirname, join
 from setuptools import setup
 
