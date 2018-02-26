@@ -195,6 +195,7 @@ class MKVFile:
             raise IndexError('track index out of range')
 
     def exclude_internal_chapters(self):
+        """Ignore the internal subtitles of the MKVFile"""
         for track in self.tracks:
             track.chapters_exclude = True
 
@@ -254,7 +255,3 @@ class MKVFile:
             self.tracks[track_num_1], self.tracks[track_num_2] = self.tracks[track_num_2], self.tracks[track_num_1]
         else:
             raise IndexError('track index out of range')
-
-    @staticmethod
-    def get_json(path, mkvmerge_path='mkvmerge'):
-        return sp.check_output([mkvmerge_path, '-J', expanduser(path)]).decode('utf8')
