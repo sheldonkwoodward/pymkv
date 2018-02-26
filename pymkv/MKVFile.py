@@ -121,14 +121,23 @@ class MKVFile:
             print('Running with command:\n"' + command + '"')
             sp.run(self.command(expanduser(output_file), subprocess=True))
 
-    def add_track(self, track):
+    def add_track(self, track, track_name=None):
         """Add an MKVTrack to the MKVFile.
 
-        track (MKVTrack):
+        track (str, MKVTrack):
             The MKVTrack to be added the MKVFile.
+        track_name (str, optional):
+            The name of the new track. Will override any previous name.
         """
-        # TODO: add track from path
-        self.tracks.append(track)
+        if isinstance(track, str):
+            new_track = MKVTrack(track, track_name=track_name)
+            self.tracks.append(new_track)
+        elif isinstance(track, MKVTrack):
+            if track_name:
+                track.track_name = track_name
+            self.tracks.append(track)
+        else:
+            raise TypeError('track is not str or MKVTrack')
 
     def add_file(self, file):
         """Combine an MKVFile with another MKVFile.
@@ -136,8 +145,13 @@ class MKVFile:
         file (MKVFile):
             The MKVFile to be combined with the MKVFile.
         """
-        # TODO: add file from path
-        self.tracks = self.tracks + file.tracks
+        if isinstance(file, str):
+            new_file = MKVFile(file)
+            self.tracks = self.tracks + new_file.tracks
+        elif isinstance(file, MKVFile):
+            self.tracks = self.tracks + file.tracks
+        else:
+            raise TypeError('track is not str or MKVFile')
 
     def remove_track(self, track_num):
         """Remove a track from the MKVFile.
