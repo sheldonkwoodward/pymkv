@@ -9,22 +9,22 @@ class MKVTrack:
     def __init__(self, path, default_track=False, forced_track=False, language='eng', track_name=None):
         """An class that represents an MKV track such as video, audio, or subtitles.
 
-        MKVTracks can be added to an MKVFile. MKVTracks can be video, audio, or subtitle tracks.
+        MKVTracks can be added to an MKVFile. MKVTracks can be video, audio, or subtitle tracks. The only required
+        argument is path which gives the path to a track file.
 
-        :param path: str
-            Path to the track file.
-        :param default_track (optional): bool
-            Determines if the track should be the default track of its type when muxed into
-            an MKV file.
-        :param forced_track (optional): bool
-            Determines if the track should be a forced track when muxed into an MKV file.
-        :param language (optional): str
-            The language of the track. It must follow the guidelines specified here:
-            www.matroska.org/technical/specs/index.html#languages
-        :param track_name (optional): str
-            The name that will be given to the track when muxed into a file.
+        Args:
+            path (str):
+                Path to the track file.
+            default_track (bool, optional):
+                Determines if the track should be the default track of its type when muxed into an MKV file.
+            forced_track (bool, optional):
+                Determines if the track should be a forced track when muxed into an MKV file.
+            language (str, optional):
+                The language of the track. It must follow the guidelines specified here:
+                www.matroska.org/technical/specs/index.html#languages
+            track_name (str, optional):
+                The name that will be given to the track when muxed into a file.
         """
-
         self.mkvmerge_path = 'mkvmerge'
         self.path = path
         self.default_track = default_track
@@ -50,13 +50,13 @@ class MKVFile:
         After an MKVFile has been created, an mkvmerge command can be generated using command() or the file can be
         muxed using mux().
 
-        :param path (optional): str
-            Path to a pre-existing MKV file. The file will be imported into the new MKVFile object.
-        :param title (optional) : str
-            The internal title given to the MKVFile. If no title is given, the title of the pre-existing file will be
-            used if it exists.
+        Args:
+            path (str, optional):
+                Path to a pre-existing MKV file. The file will be imported into the new MKVFile object.
+            title (str, optional):
+                The internal title given to the MKVFile. If no title is given, the title of the pre-existing file will be
+                used if it exists.
         """
-
         self.mkvmerge_path = 'mkvmerge'
         self.path = path
         self.title = title
@@ -84,16 +84,16 @@ class MKVFile:
     def command(self, output_file, subprocess=False):
         """Generates an mkvmerge command based on the configured MKVFile.
 
-        :param output_file: str
-            The path to be used as the output file in the mkvmerge command.
-        :param subprocess: bool
-            Will return the command as a list so it can be used easily with the subprocess module.
-        :return:
-            Returns the command to create the specified MKV file.
-        :rtype:
-            Returns a string by default. Will return a list if subprocess is true.
-        """
+        Args:
+            output_file (str):
+                The path to be used as the output file in the mkvmerge command.
+            subprocess (bool):
+                Will return the command as a list so it can be used easily with the subprocess module.
 
+        Returns:
+            Returns the command to create the specified MKV file. Return type is str by default. Will return as list if
+            subprocess is true.
+        """
         command = [self.mkvmerge_path, '-o', output_file]
         if self.title:
             command.extend(['--title', self.title])
@@ -133,12 +133,11 @@ class MKVFile:
     def mux(self, output_file, silent=False):
         """Muxes the specified MKVFile.
 
-        :param output_file: str
+        output_file (str):
             The path to be used as the output file in the mkvmerge command.
-        :param silent: bool
+        silent (bool):
             By default the mkvmerge output will be shown unless silent is True.
         """
-
         if silent:
             sp.check_output(self.command(output_file, subprocess=True))
         else:
@@ -149,28 +148,25 @@ class MKVFile:
     def add_track(self, track):
         """Add an MKVTrack to the MKVFile.
 
-        :param track: MKVTrack
+        track (MKVTrack):
             The MKVTrack to be added the MKVFile.
         """
-
         self.tracks.append(track)
 
     def add_file(self, file):
         """Combine an MKVFile with another MKVFile.
 
-        :param file: MKVFile
+        file (MKVFile):
             The MKVFile to be combined with the MKVFile.
         """
-
         self.tracks = self.tracks + file.tracks
 
     def remove_track(self, track_num):
         """Remove a track from the MKVFile.
 
-        :param track_num: int
+        track_num (int):
             The track number of the track to remove.
         """
-
         if 0 <= track_num < len(self.tracks):
             del self.tracks[track_num]
         else:
@@ -179,10 +175,9 @@ class MKVFile:
     def move_track_front(self, track_num):
         """Set a track as the first in an MKVFile.
 
-        :param track_num: int
+        track_num (int):
             The track number of the track to move to the front.
         """
-
         if 0 <= track_num < len(self.tracks):
             self.tracks.insert(0, self.tracks.pop(self.tracks[track_num]))
         else:
@@ -191,10 +186,9 @@ class MKVFile:
     def move_track_end(self, track_num):
         """Set as track as the last in an MKVFile.
 
-        :param track_num: int
+        track_num (int):
             The track number of the track to move to the back.
         """
-
         if 0 <= track_num < len(self.tracks):
             self.tracks.append(self.tracks.pop(self.tracks[track_num]))
         else:
@@ -203,10 +197,9 @@ class MKVFile:
     def move_track_forward(self, track_num):
         """Move a track forward in an MKVFile.
 
-        :param track_num: int
+        track_num (int):
             The track number of the track to move forward.
         """
-
         if 0 <= track_num < len(self.tracks) - 1:
             self.tracks[track_num], self.tracks[track_num + 1] = self.tracks[track_num + 1], self.tracks[track_num]
         else:
@@ -215,10 +208,9 @@ class MKVFile:
     def move_track_backward(self, track_num):
         """Move a track backward in an MKVFile.
 
-        :param track_num: int
+        track_num (int):
             The track number of the track to move backward.
         """
-
         if 0 < track_num < len(self.tracks):
             self.tracks[track_num], self.tracks[track_num - 1] = self.tracks[track_num - 1], self.tracks[track_num]
         else:
@@ -227,12 +219,11 @@ class MKVFile:
     def swap_tracks(self, track_num_1, track_num_2):
         """Swap the position of two tracks in an MKVFile.
 
-        :param track_num_1: int
+        track_num_1 (int):
             The track number of one track to swap.
-        :param track_num_2: int
+        track_num_2 (int):
             The track number of the other track to swap
         """
-
         if 0 <= track_num_1 < len(self.tracks) and 0 <= track_num_2 < len(self.tracks):
             self.tracks[track_num_1], self.tracks[track_num_2] = self.tracks[track_num_2], self.tracks[track_num_1]
         else:
