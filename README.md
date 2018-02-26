@@ -1,4 +1,6 @@
-# pymkv
+# pymkv 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e1fe077d95f74a5886c557024777c26c)](https://www.codacy.com/app/sheldonkwoodward/pymkv?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=sheldonkwoodward/pymkv&amp;utm_campaign=Badge_Grade)
+
 pymkv is a Python wrapper for mkvmerge. It provides support for muxing tracks together, combining multiple MKV files, reordering tracks, naming tracks, and other MKV related things.
 
 
