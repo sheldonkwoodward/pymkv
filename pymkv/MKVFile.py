@@ -5,7 +5,7 @@
 
 import subprocess as sp
 import json
-from os.path import expanduser
+from os.path import expanduser, isfile
 
 from pymkv import MKVTrack
 
@@ -101,6 +101,10 @@ class MKVFile:
             else:
                 command.extend(['-s', str(track.track_id)])
 
+            # exclude chapters
+            if track.chapters_exclude:
+                command.append('--no-chapters')
+
             # add path
             command.append(track.path)
 
@@ -171,8 +175,13 @@ class MKVFile:
                 Must be an ISO639-2 language code. Only works if no existing language information exists in chapters.
         """
         self.chapters = expanduser(chapters)
-        # TODO: check language code
-        self.chapter_language = language
+        if not isfile(self.chapters):
+            raise FileNotFoundError('file specified does not exist')
+        if language:
+            if language in open('ISO639-2.txt').read():
+                self.chapter_language = language
+            else:
+                raise ValueError('not an ISO639-2 language code')
 
     def remove_track(self, track_num):
         """Remove a track from the MKVFile.
@@ -184,6 +193,10 @@ class MKVFile:
             del self.tracks[track_num]
         else:
             raise IndexError('track index out of range')
+
+    def exclude_internal_chapters(self):
+        for track in self.tracks:
+            track.chapters_exclude = True
 
     def move_track_front(self, track_num):
         """Set a track as the first in an MKVFile.
