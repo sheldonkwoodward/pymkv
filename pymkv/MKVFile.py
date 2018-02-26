@@ -129,10 +129,10 @@ class MKVFile:
         track_name (str, optional):
             The name of the new track. Will override any previous name.
         """
-        if type(track) is str:
+        if isinstance(track, str):
             new_track = MKVTrack(track, track_name=track_name)
             self.tracks.append(new_track)
-        elif type(track) is MKVTrack:
+        elif isinstance(track, MKVTrack):
             if track_name:
                 track.track_name = track_name
             self.tracks.append(track)
@@ -145,10 +145,10 @@ class MKVFile:
         file (MKVFile):
             The MKVFile to be combined with the MKVFile.
         """
-        if type(file) is str:
+        if isinstance(file, str):
             new_file = MKVFile(file)
             self.tracks = self.tracks + new_file.tracks
-        elif type(file) is MKVFile:
+        elif isinstance(file, MKVFile):
             self.tracks = self.tracks + file.tracks
         else:
             raise TypeError('track is not str or MKVFile')
