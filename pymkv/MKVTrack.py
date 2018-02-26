@@ -5,6 +5,7 @@
 
 import subprocess as sp
 import json
+from os.path import expanduser
 
 
 class MKVTrack:
@@ -28,7 +29,7 @@ class MKVTrack:
                 The name that will be given to the track when muxed into a file.
         """
         self.mkvmerge_path = 'mkvmerge'
-        self.path = path
+        self.path = expanduser(path)
         self.default_track = default_track
         self.forced_track = forced_track
         self.language = language

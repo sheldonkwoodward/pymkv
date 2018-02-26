@@ -5,6 +5,7 @@
 
 import subprocess as sp
 import json
+from os.path import expanduser
 
 from pymkv import MKVTrack
 
@@ -31,7 +32,9 @@ class MKVFile:
                 used if it exists.
         """
         self.mkvmerge_path = 'mkvmerge'
-        self.path = path
+        self.path = None
+        if path:
+            self.path = expanduser(path)
         self.title = title
         self.tracks = []
         if path:
@@ -67,7 +70,7 @@ class MKVFile:
             Returns the command to create the specified MKV file. Return type is str by default. Will return as list if
             subprocess is true.
         """
-        command = [self.mkvmerge_path, '-o', output_file]
+        command = [self.mkvmerge_path, '-o', expanduser(output_file)]
         if self.title:
             command.extend(['--title', self.title])
         # add tracks
@@ -112,11 +115,11 @@ class MKVFile:
             By default the mkvmerge output will be shown unless silent is True.
         """
         if silent:
-            sp.check_output(self.command(output_file, subprocess=True))
+            sp.check_output(self.command(expanduser(output_file), subprocess=True))
         else:
-            command = self.command(output_file)
+            command = self.command(expanduser(output_file))
             print('Running with command:\n"' + command + '"')
-            sp.run(self.command(output_file, subprocess=True))
+            sp.run(self.command(expanduser(output_file), subprocess=True))
 
     def add_track(self, track):
         """Add an MKVTrack to the MKVFile.
@@ -124,6 +127,7 @@ class MKVFile:
         track (MKVTrack):
             The MKVTrack to be added the MKVFile.
         """
+        # TODO: add track from path
         self.tracks.append(track)
 
     def add_file(self, file):
@@ -132,6 +136,7 @@ class MKVFile:
         file (MKVFile):
             The MKVFile to be combined with the MKVFile.
         """
+        # TODO: add file from path
         self.tracks = self.tracks + file.tracks
 
     def remove_track(self, track_num):
