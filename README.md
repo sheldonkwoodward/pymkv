@@ -52,25 +52,25 @@ The mux function uses <b>command()</b> and the <b>subprocess</b> module to mux t
 There is an optional <b>silent</b> argument that will suppress the mkvmerge output. By default, the output is shown.
 
 #### add_track(track)
-The <b>add_track()</b> function is used to add a track to the MKVFile. The track object is provided as an argument. The order in which the tracks are added is the same order that they are initially set to be in the MKV file. More info on creating tracks is available in the Tracks section.
+The <b>add_track()</b> function is used to add a track to the MKVFile. The <b>track</b> object or a path to a track is provided as an argument. A track_name can be supplied as an optional argument. The order in which the tracks are added is the same order that they are initially set to be in the MKV file. More info on creating tracks is available in the Tracks section.
 
 Example:
 ```
 mkv = MKVFile('path/to/mkv/file.mkv')
 video = MKVTrack('path/to/video/track.h264')
-audio = MKVTrack('path/to/audio/track.aac')
 mkv.add_track(video)
-mkv.add_track(audio)
+mkv.add_track('path/to/audio/track.aac', 'Audio track name')
 ```
 
 #### add_file(file)
-The <b>add_file()</b> function is used to import tracks from the specified <b>file</b> to the MKVFile. The <b>file</b> object is provided as an argument. The tracks from the specified file are added to the end of the file list of the file that calls <b>add_file()</b>.
+The <b>add_file()</b> function is used to import tracks from the specified <b>file</b> to another MKVFile. The <b>file</b> object or path to a file is provided as an argument. The tracks from the specified file are added to the end of the file list of the file that calls <b>add_file()</b>.
 
 Example:
 ```
 mkv_1 = MKVFile('path/to/mkv/file.mkv')
 mkv_2 = MKVFile('path/to/another/mkv/file.mkv')
 mkv_1.add_file(mkv_2)
+mkv_1.add_file('path/to/a/third/mkv/file.mkv')
 ```
 
 #### remove_track(track_num*)
