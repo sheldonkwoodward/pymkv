@@ -36,6 +36,8 @@ class MKVFile:
         if path:
             self.path = expanduser(path)
         self.title = title
+        self.chapters = None
+        self.chapter_language = None
         self.tracks = []
         if path:
             # add file title
@@ -102,6 +104,12 @@ class MKVFile:
             # add path
             command.append(track.path)
 
+        # chapters
+        if self.chapter_language:
+            command.extend(['--chapter-language', self.chapter_language])
+        if self.chapters:
+            command.extend(['--chapters', self.chapters])
+
         if subprocess:
             return command
         return " ".join(command)
@@ -152,6 +160,19 @@ class MKVFile:
             self.tracks = self.tracks + file.tracks
         else:
             raise TypeError('track is not str or MKVFile')
+
+    def add_chapters(self, chapters, language=None):
+        """Add a chapters file to an MKVFile.
+
+        Args:
+            chapters (str):
+                The chapters file to be added to the MKVFile.
+            language (str, optional):
+                Must be an ISO639-2 language code. Only works if no existing language information exists in chapters.
+        """
+        self.chapters = expanduser(chapters)
+        # TODO: check language code
+        self.chapter_language = language
 
     def remove_track(self, track_num):
         """Remove a track from the MKVFile.
@@ -220,3 +241,7 @@ class MKVFile:
             self.tracks[track_num_1], self.tracks[track_num_2] = self.tracks[track_num_2], self.tracks[track_num_1]
         else:
             raise IndexError('track index out of range')
+
+    @staticmethod
+    def get_json(path, mkvmerge_path='mkvmerge'):
+        return sp.check_output([mkvmerge_path, '-J', expanduser(path)]).decode('utf8')

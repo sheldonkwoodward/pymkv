@@ -112,7 +112,7 @@ MKVTracks also have five optional arguments:
 
 * **forced_track** True or False value to specify if the track is a forced track. False be default.
 
-* **language** Sets the language of the track. Must follow the [MKV language convention](www.matroska.org/technical/specs/index.html#languages) to work properly.
+* **language** Sets the language of the track. Must be am ISO639-2 language code to work properly.
 
 * **track_name** Sets the name of the track.
 

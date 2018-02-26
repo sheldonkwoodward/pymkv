@@ -32,6 +32,7 @@ class MKVTrack:
         self.path = expanduser(path)
         self.default_track = default_track
         self.forced_track = forced_track
+        # TODO: check language code
         self.language = language
         self.track_id = 0
         self.track_name = track_name
