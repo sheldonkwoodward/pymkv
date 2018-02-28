@@ -32,7 +32,14 @@ class MKVTrack:
         self.path = expanduser(path)
         self.default_track = default_track
         self.forced_track = forced_track
+        self.chapters_exclude = False
         self.language = language
+        # TODO: refactor default language to None
+        if language in open('ISO639-2.txt').read():
+            self.language = language
+        else:
+            self.language = 'und'
+            raise ValueError('not an ISO639-2 language code')
         self.track_id = 0
         self.track_name = track_name
         info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.path]).decode('utf8'))

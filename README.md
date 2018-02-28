@@ -73,8 +73,14 @@ mkv_1.add_file(mkv_2)
 mkv_1.add_file('path/to/a/third/mkv/file.mkv')
 ```
 
+#### add_chapters(chapters, language=None)
+The <b>add_file()</b> function is used to import a chapters file into the MKVFile. The path to a file is provided as an argument. Any chapters existing in an import MKV file will still remain in the muxed output unless they are excluded using <b>exclude_internal_chapters()</b>.
+
 #### remove_track(track_num*)
 The <b>remove_track()</b> function removes the track at the index <b>track_num</b>.
+
+#### exclude_internal_chapters()
+The <b>exclude_internal_chapters()</b> function will exclude all internal chapters of the currently specified MKVFile. Chapters will be included in the mux if they are added from an external file or if another file with non-excluded chapters is added using <b>add_track()</b>.
 
 #### move_track_front(track_num*)
 The <b>move_track_front()</b> function sets the track at the index <b>track_num</b> as the first track in the file.
@@ -97,26 +103,24 @@ The <b>swap_tracks()</b> function swaps the tracks at the index <b>track_num_1</
 
 
 ## MKVTrack
-MKV tracks are embodied by the Track class. In order to mux tracks together, you must create track instantiations and pass them to an MKVFile.
+MKV tracks are embodied by the MKVTrack class. In order to mux tracks together, you must use the <b>add_track()</b> function of an MKVFile.
 
 The only required argument to create a track is the path to the track file:
 ```
 track = MKVTrack('path/to/track.h264')
 ```
 
-MKVTracks also have five optional arguments:
-
-* **track_id** The ID number of of the track. For a standalone track, it is important that this value remains at the default of 0. This value should never be changed after initialization.
+MKVTracks also have four optional arguments:
 
 * **default_track** True or False value to specify if the track is the default track for its type. The first video or audio track in an MKV file will be the default track unless specified otherwise. False by default.
 
 * **forced_track** True or False value to specify if the track is a forced track. False be default.
 
-* **language** Sets the language of the track. Must follow the [MKV language convention](www.matroska.org/technical/specs/index.html#languages) to work properly.
+* **language** Sets the language of the track. Must be am ISO639-2 language code to work properly.
 
 * **track_name** Sets the name of the track.
 
 Example:
 ```
-track = MKVTrack('path/to/track.h264', track_id=0, default_track=True, forced_track=False, language='eng', track_name='A cool new track')
+track = MKVTrack('path/to/track.h264', default_track=True, forced_track=False, language='eng', track_name='A cool new track')
 ```
