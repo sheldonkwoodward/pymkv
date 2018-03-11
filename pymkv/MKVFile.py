@@ -28,8 +28,8 @@ class MKVFile:
             path (str, optional):
                 Path to a pre-existing MKV file. The file will be imported into the new MKVFile object.
             title (str, optional):
-                The internal title given to the MKVFile. If no title is given, the title of the pre-existing file will be
-                used if it exists.
+                The internal title given to the MKVFile. If no title is given, the title of the pre-existing file will
+                be used if it exists.
         """
         self.mkvmerge_path = 'mkvmerge'
         self.path = None
