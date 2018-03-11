@@ -82,6 +82,9 @@ The <b>remove_track()</b> function removes the track at the index <b>track_num</
 #### exclude_internal_chapters()
 The <b>exclude_internal_chapters()</b> function will exclude all internal chapters of the currently specified MKVFile. Chapters will be included in the mux if they are added from an external file or if another file with non-excluded chapters is added using <b>add_track()</b>.
 
+#### get_track(track_num*)
+STUB
+
 #### move_track_front(track_num*)
 The <b>move_track_front()</b> function sets the track at the index <b>track_num</b> as the first track in the file.
 
@@ -96,6 +99,9 @@ The <b>move_track_backward()</b> function moves the track at the index <b>track_
 
 #### swap_tracks(track_num_1*, track_num_2*)
 The <b>swap_tracks()</b> function swaps the tracks at the index <b>track_num_1</b> and <b>track_num_2</b> in the file.
+
+#### replace_track(track_num*, track)
+STUB
 
 <br>
 

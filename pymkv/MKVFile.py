@@ -197,16 +197,16 @@ class MKVFile:
         for track in self.tracks:
             track.exclude_chapters = True
 
-    def get_track(self, index=None):
+    def get_track(self, track_num=None):
         """Get a track from the MKVFile.
 
         index (int):
             Index of track to retrieve. Will return list if argument is not provided.
         """
-        if index is None:
+        if track_num is None:
             return self.tracks
         else:
-            return self.tracks[index]
+            return self.tracks[track_num]
 
     def move_track_front(self, track_num):
         """Set a track as the first in an MKVFile.
