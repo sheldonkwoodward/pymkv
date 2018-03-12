@@ -9,38 +9,39 @@ from os.path import expanduser
 
 
 class MKVTrack:
-    def __init__(self, path, default_track=False, forced_track=False, language='und', track_name=None):
+    def __init__(self, path, mkvmerge_path='mkvmerge', default_track=False, forced_track=False, language='und',
+                 track_name=None, exclude_chapters=False):
         """An class that represents an MKV track such as video, audio, or subtitles.
 
         MKVTracks can be added to an MKVFile. MKVTracks can be video, audio, or subtitle tracks. The only required
         argument is path which gives the path to a track file.
 
-        Args:
-            path (str):
-                Path to the track file.
-            default_track (bool, optional):
-                Determines if the track should be the default track of its type when muxed into an MKV file.
-            forced_track (bool, optional):
-                Determines if the track should be a forced track when muxed into an MKV file.
-            language (str, optional):
-                The language of the track. It must follow the guidelines specified here:
-                www.matroska.org/technical/specs/index.html#languages
-            track_name (str, optional):
-                The name that will be given to the track when muxed into a file.
+        path (str):
+            Path to the track file.
+        default_track (bool, optional):
+            Determines if the track should be the default track of its type when muxed into an MKV file.
+        forced_track (bool, optional):
+            Determines if the track should be a forced track when muxed into an MKV file.
+        language (str, optional):
+            The language of the track. It must follow the guidelines specified here:
+            www.matroska.org/technical/specs/index.html#languages
+        track_name (str, optional):
+            The name that will be given to the track when muxed into a file.
         """
-        self.mkvmerge_path = 'mkvmerge'
         self.path = expanduser(path)
         self.default_track = default_track
         self.forced_track = forced_track
-        self.chapters_exclude = False
         self.language = language
+        self.track_name = track_name
+        self.exclude_chapters = exclude_chapters
+        self.track_id = 0
+        info_json = json.loads(sp.check_output([mkvmerge_path, '-J', self.path]).decode('utf8'))
+        self.track_type = info_json['tracks'][self.track_id]['type']
+
+        # check for valid language
         # TODO: refactor default language to None
         if language in open('ISO639-2.txt').read():
             self.language = language
         else:
             self.language = 'und'
             raise ValueError('not an ISO639-2 language code')
-        self.track_id = 0
-        self.track_name = track_name
-        info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.path]).decode('utf8'))
-        self.track_type = info_json['tracks'][self.track_id]['type']

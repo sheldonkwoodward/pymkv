@@ -24,12 +24,11 @@ class MKVFile:
         After an MKVFile has been created, an mkvmerge command can be generated using command() or the file can be
         muxed using mux().
 
-        Args:
-            path (str, optional):
-                Path to a pre-existing MKV file. The file will be imported into the new MKVFile object.
-            title (str, optional):
-                The internal title given to the MKVFile. If no title is given, the title of the pre-existing file will
-                be used if it exists.
+        path (str, optional):
+            Path to a pre-existing MKV file. The file will be imported into the new MKVFile object.
+        title (str, optional):
+            The internal title given to the MKVFile. If no title is given, the title of the pre-existing file will
+            be used if it exists.
         """
         self.mkvmerge_path = 'mkvmerge'
         self.path = None
@@ -62,11 +61,10 @@ class MKVFile:
     def command(self, output_file, subprocess=False):
         """Generates an mkvmerge command based on the configured MKVFile.
 
-        Args:
-            output_file (str):
-                The path to be used as the output file in the mkvmerge command.
-            subprocess (bool):
-                Will return the command as a list so it can be used easily with the subprocess module.
+        output_file (str):
+            The path to be used as the output file in the mkvmerge command.
+        subprocess (bool):
+            Will return the command as a list so it can be used easily with the subprocess module.
 
         Returns:
             Returns the command to create the specified MKV file. Return type is str by default. Will return as list if
@@ -102,7 +100,7 @@ class MKVFile:
                 command.extend(['-s', str(track.track_id)])
 
             # exclude chapters
-            if track.chapters_exclude:
+            if track.exclude_chapters:
                 command.append('--no-chapters')
 
             # add path
@@ -168,11 +166,10 @@ class MKVFile:
     def add_chapters(self, chapters, language=None):
         """Add a chapters file to an MKVFile.
 
-        Args:
-            chapters (str):
-                The chapters file to be added to the MKVFile.
-            language (str, optional):
-                Must be an ISO639-2 language code. Only works if no existing language information exists in chapters.
+        chapters (str):
+            The chapters file to be added to the MKVFile.
+        language (str, optional):
+            Must be an ISO639-2 language code. Only works if no existing language information exists in chapters.
         """
         self.chapters = expanduser(chapters)
         if not isfile(self.chapters):
@@ -197,7 +194,18 @@ class MKVFile:
     def exclude_internal_chapters(self):
         """Ignore the internal subtitles of the MKVFile"""
         for track in self.tracks:
-            track.chapters_exclude = True
+            track.exclude_chapters = True
+
+    def get_track(self, track_num=None):
+        """Get a track from the MKVFile.
+
+        index (int):
+            Index of track to retrieve. Will return list if argument is not provided.
+        """
+        if track_num is None:
+            return self.tracks
+        else:
+            return self.tracks[track_num]
 
     def move_track_front(self, track_num):
         """Set a track as the first in an MKVFile.
@@ -253,5 +261,18 @@ class MKVFile:
         """
         if 0 <= track_num_1 < len(self.tracks) and 0 <= track_num_2 < len(self.tracks):
             self.tracks[track_num_1], self.tracks[track_num_2] = self.tracks[track_num_2], self.tracks[track_num_1]
+        else:
+            raise IndexError('track index out of range')
+
+    def replace_track(self, track_num, track):
+        """Replace a track with another track in an MKVFile.
+
+        track_num (int):
+            The track number of the track to replace.
+        track (MKVTrack):
+            The MKVTrack to be replaced into the file.
+        """
+        if 0 <= track_num < len(self.tracks):
+            self.tracks[track_num] = track
         else:
             raise IndexError('track index out of range')
