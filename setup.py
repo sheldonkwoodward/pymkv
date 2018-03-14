@@ -34,4 +34,5 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     keywords='wrapper',
+    python_requires='>=3',
 )
