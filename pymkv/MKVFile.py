@@ -285,6 +285,12 @@ class MKVFile:
             raise IndexError('track index out of range')
 
     def split_size(self, size):
+        """Split the output file into parts by size.
+
+        size (bitmath obj, int):
+            The size of each split file. Takes either a bitmath size object or an integer representing the number of
+            bytes.
+        """
         if getattr(size, '__module__', None) == bitmath.__name__:
             size = size.bytes
         elif not isinstance(size, int):
@@ -292,9 +298,15 @@ class MKVFile:
         self._split_options = ['--split', 'size:{}'.format(size)]
 
     def split_duration(self, duration):
+        """Split the output file into parts by duration.
+
+        duration (str, int):
+            The duration of each split file. Takes either a str formatted to HH:MM:SS.nnnnnnnnn or an integer
+            representing the number of seconds. The duration string requires formatting of at least M:S.
+        """
         if isinstance(duration, str) and re.match('^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', duration):
             self._split_options = ['--split', 'duration:' + duration]
         elif isinstance(duration, int):
-            self._split_options = ['--split', '{}s'.format(duration)]
+            self._split_options = ['--split', 'duration:{}s'.format(duration)]
         else:
             raise TypeError('duration is not a valid string or integer')
