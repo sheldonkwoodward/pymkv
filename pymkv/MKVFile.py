@@ -310,3 +310,42 @@ class MKVFile:
             self._split_options = ['--split', 'duration:{}s'.format(duration)]
         else:
             raise TypeError('duration is not a valid string or integer')
+
+    def split_timestamps(self, *timestamps):
+        """Split the output file into parts by timestamps.
+
+        *timestamps (str, int, list, tuple):
+            The timestamps to split the file by. Can be passed as any combination of strs and ints, inside or outside
+            an Iterable object. Any lists will be flattened. Timestamps must be ints, representing seconds, or strs in
+            the form HH:MM:SS.nnnnnnnnn. The timestamp string requires formatting of at least M:S.
+        """
+        if len(timestamps) == 0:
+            raise ValueError('no timestamps given')
+        timestamps = MKVFile.flatten(timestamps)
+        ts_string = 'timestamps:'
+        for ts in timestamps:
+            if isinstance(ts, int):
+                ts_string += '{}s'.format(ts) + ','
+            elif isinstance(ts, str) and re.match('^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', ts):
+                ts_string += ts + ','
+            elif not isinstance(ts, int) and not isinstance(ts, str):
+                raise TypeError('timestamp is not of type int or str')
+            else:
+                raise ValueError('timestamp is not a properly formatted str')
+
+        self._split_options = ['--split', ts_string[:-1]]
+
+    @staticmethod
+    def flatten(item):
+        """Flatten a list.
+
+        item (Iterable):
+            An iterable object with nested iterables to be flattened.
+        """
+        flat_list = []
+        if isinstance(item, (list, tuple)):
+            for item in item:
+                flat_list.extend(MKVFile.flatten(item))
+            return flat_list
+        else:
+            return [item]
