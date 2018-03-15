@@ -5,6 +5,7 @@
 
 from os.path import abspath, dirname, join
 from setuptools import setup
+from pip.req import parse_requirements
 
 from pymkv import __version__
 
@@ -12,6 +13,8 @@ from pymkv import __version__
 this_dir = abspath(dirname(__file__))
 with open(join(this_dir, 'README.rst'), encoding='utf-8') as file:
     long_description = file.read()
+
+install_requires = [str(ir.req) for ir in parse_requirements('requirements.txt', session=False)]
 
 
 setup(
@@ -35,4 +38,5 @@ setup(
     ],
     keywords='wrapper',
     python_requires='>=3',
+    install_requires=install_requires
 )

@@ -6,6 +6,9 @@
 import subprocess as sp
 import json
 from os.path import expanduser, isfile
+from re import match
+
+import bitmath
 
 from pymkv import MKVTrack
 
@@ -31,14 +34,14 @@ class MKVFile:
             be used if it exists.
         """
         self.mkvmerge_path = 'mkvmerge'
-        self.path = None
-        if path:
-            self.path = expanduser(path)
         self.title = title
         self.chapters = None
         self.chapter_language = None
         self.tracks = []
-        if path:
+        self.path = None
+        if path is not None:
+            self.path = expanduser(path)
+
             # add file title
             info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.path]).decode('utf8'))
             if not self.title and 'title' in info_json['container']['properties']:
@@ -57,6 +60,9 @@ class MKVFile:
                 if 'track_name' in track['properties']:
                     new_track.track_name = track['properties']['track_name']
                 self.add_track(new_track)
+
+        # options
+        self._split_options = []
 
     def command(self, output_file, subprocess=False):
         """Generates an mkvmerge command based on the configured MKVFile.
@@ -111,6 +117,9 @@ class MKVFile:
             command.extend(['--chapter-language', self.chapter_language])
         if self.chapters:
             command.extend(['--chapters', self.chapters])
+
+        # split options
+        command.extend(self._split_options)
 
         if subprocess:
             return command
@@ -204,8 +213,7 @@ class MKVFile:
         """
         if track_num is None:
             return self.tracks
-        else:
-            return self.tracks[track_num]
+        return self.tracks[track_num]
 
     def move_track_front(self, track_num):
         """Set a track as the first in an MKVFile.
@@ -276,3 +284,10 @@ class MKVFile:
             self.tracks[track_num] = track
         else:
             raise IndexError('track index out of range')
+
+    def split_size(self, size):
+        if getattr(size, '__module__', None) == bitmath.__name__:
+            size = size.bytes
+        elif not isinstance(size, int):
+            raise TypeError('size is not a bitmath object or integer')
+        self._split_options = ['--split', 'size:{}'.format(size)]
