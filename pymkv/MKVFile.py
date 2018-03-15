@@ -6,7 +6,7 @@
 import subprocess as sp
 import json
 from os.path import expanduser, isfile
-from re import match
+import re
 
 import bitmath
 
@@ -291,3 +291,11 @@ class MKVFile:
         elif not isinstance(size, int):
             raise TypeError('size is not a bitmath object or integer')
         self._split_options = ['--split', 'size:{}'.format(size)]
+
+    def split_duration(self, duration):
+        if isinstance(duration, str) and re.match('^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', duration):
+            self._split_options = ['--split', 'duration:' + duration]
+        elif isinstance(duration, int):
+            self._split_options = ['--split', '{}s'.format(duration)]
+        else:
+            raise TypeError('duration is not a valid string or integer')
