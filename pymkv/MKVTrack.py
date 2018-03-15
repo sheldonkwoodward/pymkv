@@ -10,7 +10,7 @@ from os.path import expanduser
 
 class MKVTrack:
     def __init__(self, path, mkvmerge_path='mkvmerge', default_track=False, forced_track=False, language='und',
-                 track_name=None, exclude_chapters=False):
+                 track_name=None, exclude_chapters=False, track_id=0):
         """An class that represents an MKV track such as video, audio, or subtitles.
 
         MKVTracks can be added to an MKVFile. MKVTracks can be video, audio, or subtitle tracks. The only required
@@ -34,7 +34,7 @@ class MKVTrack:
         self.language = language
         self.track_name = track_name
         self.exclude_chapters = exclude_chapters
-        self.track_id = 0
+        self.track_id = track_id
         info_json = json.loads(sp.check_output([mkvmerge_path, '-J', self.path]).decode('utf8'))
         self.track_type = info_json['tracks'][self.track_id]['type']
 

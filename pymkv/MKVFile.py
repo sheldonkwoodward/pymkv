@@ -49,8 +49,7 @@ class MKVFile:
 
             # add tracks with info
             for track in info_json['tracks']:
-                new_track = MKVTrack(self.path)
-                new_track.track_id = track['id']
+                new_track = MKVTrack(self.path, track_id=track['id'])
                 if 'default_track' in track['properties']:
                     new_track.default_track = track['properties']['default_track']
                 if 'forced_track' in track['properties']:
