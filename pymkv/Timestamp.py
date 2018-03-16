@@ -42,7 +42,61 @@ class Timestamp:
             self._ss = 0 if self._ss is None else self._ss
             self._nn = 0 if self._nn is None else self._nn
 
-    # TODO overload comparison operators
+    def __eq__(self, other):
+        return self.hh == other.hh and self.mm == other.mm and self.ss == other.ss and self.nn == other.nn
+
+    def __ne__(self, other):
+        return self.hh != other.hh or self.mm != other.mm or self.ss != other.ss or self.nn != other.nn
+
+    def __lt__(self, other):
+        if self.hh != other.hh:
+            return self.hh < other.hh
+        elif self.mm != other.mm:
+            return self.mm < other.mm
+        elif self.ss != other.ss:
+            return self.ss < other.ss
+        elif self.nn != other.nn:
+            return self.nn < other.nn
+        return False
+
+    def __le__(self, other):
+        if self.hh != other.hh:
+            return self.hh <= other.hh
+        elif self.mm != other.mm:
+            return self.mm <= other.mm
+        elif self.ss != other.ss:
+            return self.ss <= other.ss
+        elif self.nn != other.nn:
+            return self.nn <= other.nn
+        return True
+
+    def __gt__(self, other):
+        if self.hh != other.hh:
+            return self.hh > other.hh
+        elif self.mm != other.mm:
+            return self.mm > other.mm
+        elif self.ss != other.ss:
+            return self.ss > other.ss
+        elif self.nn != other.nn:
+            return self.nn > other.nn
+        return False
+
+    def __ge__(self, other):
+        if self.hh != other.hh:
+            return self.hh >= other.hh
+        elif self.mm != other.mm:
+            return self.mm >= other.mm
+        elif self.ss != other.ss:
+            return self.ss >= other.ss
+        elif self.nn != other.nn:
+            return self.nn >= other.nn
+        return True
+
+    def __str__(self):
+        return self.ts
+
+    def __getitem__(self, index):
+        return (self.hh, self.mm, self.ss, self.ss)[index]
 
     @property
     def ts(self):
