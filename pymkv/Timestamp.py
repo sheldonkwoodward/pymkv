@@ -14,7 +14,7 @@ class Timestamp:
         Specific time values can overridden in the timestamp using 'hh', 'mm', 'ss', and 'nn'. Any override value
         that is greater than its maximum (ex. 61 minutes) will be set to 0.
 
-        timestamp (str, int):
+        timestamp (str, int, Timestamp):
             A str of a timestamp acceptable to mkvmerge or an int representing seconds. This value will be
             the basis of the timestamp.
         hh (int):
@@ -34,7 +34,12 @@ class Timestamp:
         self._ss = ss
         self._nn = nn
         self._form = form
-        if timestamp is not None:
+        if isinstance(timestamp, Timestamp):
+            self._hh = timestamp.hh
+            self._mm = timestamp.mm
+            self._ss = timestamp.ss
+            self._nn = timestamp.nn
+        elif timestamp is not None:
             self.extract(timestamp)
         else:
             self._hh = 0 if self._hh is None else self._hh
