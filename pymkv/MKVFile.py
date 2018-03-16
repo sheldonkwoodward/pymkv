@@ -335,6 +335,13 @@ class MKVFile:
         self._split_options = ['--split', ts_string[:-1]]
 
     def split_parts(self, parts):
+        """Split the output in parts by parts.
+
+        parts (list, tuple):
+            An iterable of timestamp pairs. Each timestamp pair should be an iterable of two timestamps. The very
+            first and last timestamps are permitted to be None. Also accepts timestamps with a '+' sign at the
+            beginning.
+        """
         if len(parts) == 0:
             raise ValueError('no timestamps given')
         ts_string = 'parts:'
@@ -345,9 +352,10 @@ class MKVFile:
             if not isinstance(pair, (list, tuple)) or len(pair) != 2:
                 raise ValueError('"{}" is not a properly formatted pair'.format(pair))
             # check for properly formatted timestamps
-            for i in (0, 1):
-                if pair[i] is not None and not MKVFile.check_ts(pair[i], plus=True):
-                    raise ValueError('"{}" is not a properly formatted pair'.format(pair))
+            if pair[0] is not None and not MKVFile.check_ts(pair[0], plus=True):
+                raise ValueError('"{}" is not a properly formatted pair'.format(pair))
+            if pair[1] is not None and not MKVFile.check_ts(pair[1]):
+                raise ValueError('"{}" is not a properly formatted pair'.format(pair))
             # check for identical pair values
             if pair[0] == pair[1]:
                 raise ValueError('"{}" is not a properly formatted pair'.format(pair))
@@ -371,7 +379,7 @@ class MKVFile:
     def flatten(item):
         """Flatten a list.
 
-        item (Iterable):
+        item (list, tuple):
             An iterable object with nested iterables to be flattened.
         """
         flat_list = []
@@ -384,11 +392,21 @@ class MKVFile:
 
     @staticmethod
     def check_ts(timestamp, plus=False):
+        """Check for a valid timestamp.
+
+        timestamp (str, int):
+            The timestamp to verify. Takes either a str formatted to HH:MM:SS.nnnnnnnnn or an integer
+            representing the number of seconds. The timestamp string requires formatting of at least M:S.
+        plus (bool):
+            Determines if a '+' sign should be allowed at the beginning of the timestamp. Defaults to False.
+        """
         if isinstance(timestamp, str):
             print(timestamp)
             # TODO: add plus to regex
             if re.match('^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', timestamp):
                 return True
+            elif plus and re.match('^\+?[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', timestamp):
+                return
             else:
                 return False
         elif isinstance(timestamp, int):
