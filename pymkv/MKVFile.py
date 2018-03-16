@@ -304,7 +304,7 @@ class MKVFile:
             The duration of each split file. Takes either a str formatted to HH:MM:SS.nnnnnnnnn or an integer
             representing the number of seconds. The duration string requires formatting of at least M:S.
         """
-        if isinstance(duration, str) and re.match('^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', duration):
+        if isinstance(duration, str) and MKVFile.check_ts(duration):
             self._split_options = ['--split', 'duration:' + duration]
         elif isinstance(duration, int):
             self._split_options = ['--split', 'duration:{}s'.format(duration)]
@@ -326,12 +326,44 @@ class MKVFile:
         for ts in timestamps:
             if isinstance(ts, int):
                 ts_string += '{}s'.format(ts) + ','
-            elif isinstance(ts, str) and re.match('^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', ts):
+            elif isinstance(ts, str) and MKVFile.check_ts(ts):
                 ts_string += ts + ','
             elif not isinstance(ts, int) and not isinstance(ts, str):
                 raise TypeError('timestamp is not of type int or str')
             else:
-                raise ValueError('timestamp is not a properly formatted str')
+                raise ValueError('"{}" is not a properly formatted str'.format(ts))
+        self._split_options = ['--split', ts_string[:-1]]
+
+    def split_parts(self, parts):
+        if len(parts) == 0:
+            raise ValueError('no timestamps given')
+        ts_string = 'parts:'
+
+        # build pairs
+        for pair in parts:
+            # check if in pair form
+            if not isinstance(pair, (list, tuple)) or len(pair) != 2:
+                raise ValueError('"{}" is not a properly formatted pair'.format(pair))
+            # check for properly formatted timestamps
+            for i in (0, 1):
+                if pair[i] is not None and not MKVFile.check_ts(pair[i], plus=True):
+                    raise ValueError('"{}" is not a properly formatted pair'.format(pair))
+            # check for identical pair values
+            if pair[0] == pair[1]:
+                raise ValueError('"{}" is not a properly formatted pair'.format(pair))
+
+            # first pair value
+            if isinstance(pair[0], int):
+                ts_string += str(pair[0]) + 's'
+            elif pair[0] is not None:
+                ts_string += pair[0]
+            ts_string += '-'
+            # second pair value
+            if isinstance(pair[1], int):
+                ts_string += str(pair[1]) + 's'
+            elif pair[1] is not None:
+                ts_string += pair[1]
+            ts_string += ','
 
         self._split_options = ['--split', ts_string[:-1]]
 
@@ -349,3 +381,17 @@ class MKVFile:
             return flat_list
         else:
             return [item]
+
+    @staticmethod
+    def check_ts(timestamp, plus=False):
+        if isinstance(timestamp, str):
+            print(timestamp)
+            # TODO: add plus to regex
+            if re.match('^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', timestamp):
+                return True
+            else:
+                return False
+        elif isinstance(timestamp, int):
+            return True
+        else:
+            return False
