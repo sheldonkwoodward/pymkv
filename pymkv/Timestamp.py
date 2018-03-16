@@ -1,11 +1,34 @@
 # sheldon woodward
 # 3/16/18
 
+"""Timestamp Class"""
+
 from re import match
 
 
 class Timestamp:
-    def __init__(self, timestamp=None, nn=None, ss=None, mm=None, hh=None, form='MM:SS'):
+    def __init__(self, timestamp=None, hh=None, mm=None, ss=None, nn=None, form='MM:SS'):
+        """A class that represents a timestamp used in MKVFiles.
+
+        The Timestamp class represents a timestamp used in mkvmerge. These are commonly used for splitting MKVFiles.
+        Specific time values can overridden in the timestamp using 'hh', 'mm', 'ss', and 'nn'. Any override value
+        that is greater than its maximum (ex. 61 minutes) will be set to 0.
+
+        timestamp (str, int):
+            A str of a timestamp acceptable to mkvmerge or an int representing seconds. This value will be
+            the basis of the timestamp.
+        hh (int):
+            Hours in the timestamp. This will override the hours in the given timestamp.
+        mm (int):
+            Minutes in the timestamp. This will override the minutes in the given timestamp.
+        ss (int):
+            Seconds in the timestamp. This will override the seconds in the given timestamp.
+        nn (int):
+            Nanoseconds in the timestamp. This will override the nanoseconds in the given timestamp.
+        form (int):
+            A str for the form of the returned timestamp. 'MM' and 'SS' must be included where 'HH' and 'NN' are
+            optional but will be included if 'hh' and 'nn' are not zero.
+        """
         self._hh = hh
         self._mm = mm
         self._ss = ss
@@ -19,8 +42,11 @@ class Timestamp:
             self._ss = 0 if self._ss is None else self._ss
             self._nn = 0 if self._nn is None else self._nn
 
+    # TODO overload comparison operators
+
     @property
     def ts(self):
+        """Generates the timestamp specified in the object."""
         # parse timestamp format
         format_groups = match('^(([Hh]{1,2}):)?([Mm]{1,2}):([Ss]{1,2})(\.([Nn]{1,9}))?$', self.form).groups()
         timestamp_format = [False if format_groups[i] is None else True for i in (1, 2, 3, 5)]
@@ -39,6 +65,12 @@ class Timestamp:
 
     @ts.setter
     def ts(self, timestamp):
+        """Set a new timestamp.
+
+        timestamp (str, int):
+            A str of a timestamp acceptable to mkvmerge or an int representing seconds. This value will be
+            the basis of the timestamp.
+        """
         if not isinstance(timestamp, (int, str)):
             raise TypeError('"{}" is not str or int type'.format(type(timestamp)))
         else:
@@ -90,6 +122,11 @@ class Timestamp:
 
     @staticmethod
     def verify(timestamp):
+        """Verify a timestamp has the proper form to be used in mkvmerge.
+
+        timestamp (str, int):
+            The timestamp to be verified.
+        """
         if not isinstance(timestamp, str):
             raise TypeError('"{}" is not str type'.format(type(timestamp)))
         elif match('^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', timestamp):
@@ -97,6 +134,12 @@ class Timestamp:
         return False
 
     def extract(self, timestamp):
+        """Extracts time info from a timestamp.
+
+        timestamp (str, int):
+            A str of a timestamp acceptable to mkvmerge or an int representing seconds. The timing info will be
+            extracted from this parameter.
+        """
         if not isinstance(timestamp, (str, int)):
             raise TypeError('"{}" is not str or int type'.format(type(timestamp)))
         elif isinstance(timestamp, str) and not Timestamp.verify(timestamp):
@@ -119,7 +162,6 @@ class Timestamp:
             self.mm = int(timestamp_clean[1]) if self._mm is None else self._mm
             self.ss = int(timestamp_clean[2]) if self._ss is None else self._ss
             self.nn = int(timestamp_clean[3] * 1000000000) if self._nn is None else self._nn
-
         elif isinstance(timestamp, int):
             self._hh = int(timestamp / 3600)
             self._mm = int(timestamp % 3600 / 60)
