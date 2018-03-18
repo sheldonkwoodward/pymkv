@@ -11,7 +11,7 @@ from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
 
 
 class MKVTrack:
-    def __init__(self, path, mkvmerge_path='mkvmerge', default_track=False, forced_track=False, language='und',
+    def __init__(self, path, mkvmerge_path='mkvmerge', default_track=False, forced_track=False, language=None,
                  track_name=None, exclude_chapters=False, track_id=0):
         """An class that represents an MKV track such as video, audio, or subtitles.
 
@@ -31,20 +31,34 @@ class MKVTrack:
             The name that will be given to the track when muxed into a file.
         """
         self.path = expanduser(path)
+        self.mkvmerge_path = mkvmerge_path
         self.default_track = default_track
         self.forced_track = forced_track
+        self._language = None
         self.language = language
         self.track_name = track_name
         self.exclude_chapters = exclude_chapters
-        # TODO: make track_id a property
-        self.track_id = track_id
+        self._track_id = track_id
         info_json = json.loads(sp.check_output([mkvmerge_path, '-J', self.path]).decode('utf8'))
-        self.track_type = info_json['tracks'][self.track_id]['type']
+        self.track_type = info_json['tracks'][self._track_id]['type']
 
-        # check for valid language
-        # TODO: refactor default language to None
-        if language in LANGUAGES:
-            self.language = language
+    @property
+    def language(self):
+        return self._language
+
+    @language.setter
+    def language(self, language):
+        if language in LANGUAGES or language is None:
+            self._language = language
         else:
-            self.language = 'und'
             raise ValueError('not an ISO639-2 language code')
+
+    @property
+    def track_id(self):
+        return self._track_id
+
+    @track_id.setter
+    def track_id(self, track_id):
+        self._track_id = track_id
+        info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.path]).decode('utf8'))
+        self.track_type = info_json['tracks'][self._track_id]['type']

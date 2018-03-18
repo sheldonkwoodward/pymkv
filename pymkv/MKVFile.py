@@ -133,7 +133,6 @@ class MKVFile:
         silent (bool):
             By default the mkvmerge output will be shown unless silent is True.
         """
-        # TODO: raise error if output file is same as source file
         if silent:
             sp.check_output(self.command(expanduser(output_file), subprocess=True))
         else:
