@@ -284,6 +284,9 @@ class MKVFile:
         else:
             raise IndexError('track index out of range')
 
+    def split_none(self):
+        self._split_options = []
+
     def split_size(self, size):
         """Split the output file into parts by size.
 
