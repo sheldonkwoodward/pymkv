@@ -460,6 +460,8 @@ class MKVFile:
         for c in c_flat:
             if not isinstance(c, int):
                 raise TypeError('chapter "{}" not an int'.format(c))
+            if c < 1:
+                raise ValueError('"{}" are not properly formatted chapters'.format(chapters))
         for c_1, c_2 in zip(c_flat[:-1], c_flat[1:]):
             if c_1 >= c_2:
                 raise ValueError('"{}" are not properly formatted chapters'.format(chapters))
