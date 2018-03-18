@@ -418,6 +418,33 @@ class MKVFile:
                 f_string += '-' if index % 2 == 0 else ','
         self._split_options = ['--split', f_string[:-1]]
 
+    def split_frames(self, *frames):
+        """Split the output file into parts by frames.
+
+        *frames (int, list, tuple):
+            The frames to split the file by. Can be passed as any combination of ints, inside or outside an Iterable
+            object. Any lists will be flattened. Frames must be ints.
+        """
+        # check if in timestamps form
+        f_flat = MKVFile.flatten(frames)
+        if len(f_flat) == 0:
+            raise ValueError('"{}" are not properly formatted frames'.format(frames))
+        if None in f_flat:
+            raise ValueError('"{}" are not properly formatted frames'.format(frames))
+        for f in f_flat:
+            if not isinstance(f, int):
+                raise TypeError('frame "{}" not an int'.format(f))
+
+        for f_1, f_2 in zip(MKVFile.flatten(f_flat)[:-1], MKVFile.flatten(f_flat)[1:]):
+            if f_1 >= f_2:
+                raise ValueError('"{}" are not properly formatted frames'.format(frames))
+
+        # build f_string from timestamps
+        f_string = 'frames:'
+        for f in f_flat:
+            f_string += str(f) + ','
+        self._split_options = ['--split', f_string[:-1]]
+
     @staticmethod
     def flatten(item):
         """Flatten a list.
