@@ -334,9 +334,9 @@ class MKVFile:
         """Split the output in parts by time parts.
 
         parts (list, tuple):
-            An iterable of timestamp pairs. Each timestamp set should be an iterable of two timestamps. The very
-            first and last timestamps are permitted to be None. Also accepts timestamps with a '+' sign at the
-            beginning.
+            An Iterable of timestamp sets. Each timestamp set should be an Iterable of an even number of timestamps
+            or any number of timestamp pairs. The very first and last timestamps are permitted to be None. Timestamp
+            sets containing 4 or more timestamps will output as one file containing the parts specified.
         """
         # check if in parts form
         ts_flat = MKVFile.flatten(parts)
@@ -373,6 +373,13 @@ class MKVFile:
         self._split_options = ['--split', ts_string[:-1]]
 
     def split_parts_frames(self, frame_parts):
+        """Split the output in parts by frames.
+
+        parts (list, tuple):
+            An Iterable of frame sets. Each frame set should be an Iterable of an even number of frames or any
+            number of frame pairs. The very first and last frames are permitted to be None. Frame sets containing 4
+            or more frames will output as one file containing the parts specified.
+        """
         # check if in parts form
         f_flat = MKVFile.flatten(frame_parts)
         if len(frame_parts) == 0:
