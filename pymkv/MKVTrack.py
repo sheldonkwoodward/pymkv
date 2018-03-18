@@ -7,6 +7,8 @@ import subprocess as sp
 import json
 from os.path import expanduser
 
+from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
+
 
 class MKVTrack:
     def __init__(self, path, mkvmerge_path='mkvmerge', default_track=False, forced_track=False, language='und',
@@ -41,7 +43,7 @@ class MKVTrack:
 
         # check for valid language
         # TODO: refactor default language to None
-        if language in open('ISO639-2.txt').read():
+        if language in LANGUAGES:
             self.language = language
         else:
             self.language = 'und'

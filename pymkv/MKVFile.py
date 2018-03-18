@@ -11,6 +11,7 @@ import bitmath
 
 from pymkv.MKVTrack import MKVTrack
 from pymkv.Timestamp import Timestamp
+from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
 
 
 class MKVFile:
@@ -132,6 +133,7 @@ class MKVFile:
         silent (bool):
             By default the mkvmerge output will be shown unless silent is True.
         """
+        # TODO: raise error if output file is same as source file
         if silent:
             sp.check_output(self.command(expanduser(output_file), subprocess=True))
         else:
@@ -183,7 +185,7 @@ class MKVFile:
         if not isfile(self.chapters):
             raise FileNotFoundError('file specified does not exist')
         if language:
-            if language in open('ISO639-2.txt').read():
+            if language in LANGUAGES:
                 self.chapter_language = language
             else:
                 raise ValueError('not an ISO639-2 language code')
