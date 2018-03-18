@@ -7,7 +7,11 @@ import subprocess as sp
 import json
 from os.path import expanduser, isfile
 
-from pymkv import MKVTrack
+import bitmath
+
+from pymkv.MKVTrack import MKVTrack
+from pymkv.Timestamp import Timestamp
+from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
 
 
 class MKVFile:
@@ -31,14 +35,14 @@ class MKVFile:
             be used if it exists.
         """
         self.mkvmerge_path = 'mkvmerge'
-        self.path = None
-        if path:
-            self.path = expanduser(path)
         self.title = title
         self.chapters = None
         self.chapter_language = None
         self.tracks = []
-        if path:
+        self.path = None
+        if path is not None:
+            self.path = expanduser(path)
+
             # add file title
             info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.path]).decode('utf8'))
             if not self.title and 'title' in info_json['container']['properties']:
@@ -46,8 +50,7 @@ class MKVFile:
 
             # add tracks with info
             for track in info_json['tracks']:
-                new_track = MKVTrack(self.path)
-                new_track.track_id = track['id']
+                new_track = MKVTrack(self.path, track_id=track['id'])
                 if 'default_track' in track['properties']:
                     new_track.default_track = track['properties']['default_track']
                 if 'forced_track' in track['properties']:
@@ -57,6 +60,9 @@ class MKVFile:
                 if 'track_name' in track['properties']:
                     new_track.track_name = track['properties']['track_name']
                 self.add_track(new_track)
+
+        # options
+        self._split_options = []
 
     def command(self, output_file, subprocess=False):
         """Generates an mkvmerge command based on the configured MKVFile.
@@ -76,9 +82,9 @@ class MKVFile:
         # add tracks
         for track in self.tracks:
             # flags
-            if track.track_name:
+            if track.track_name is not None:
                 command.extend(['--track-name', str(track.track_id) + ':' + track.track_name])
-            if track.language:
+            if track.language is not None:
                 command.extend(['--language', str(track.track_id) + ':' + track.language])
             if not track.default_track:
                 command.extend(['--default-track', str(track.track_id) + ':0'])
@@ -107,10 +113,13 @@ class MKVFile:
             command.append(track.path)
 
         # chapters
-        if self.chapter_language:
+        if self.chapter_language is not None:
             command.extend(['--chapter-language', self.chapter_language])
-        if self.chapters:
+        if self.chapters is not None:
             command.extend(['--chapters', self.chapters])
+
+        # split options
+        command.extend(self._split_options)
 
         if subprocess:
             return command
@@ -175,7 +184,7 @@ class MKVFile:
         if not isfile(self.chapters):
             raise FileNotFoundError('file specified does not exist')
         if language:
-            if language in open('ISO639-2.txt').read():
+            if language in LANGUAGES:
                 self.chapter_language = language
             else:
                 raise ValueError('not an ISO639-2 language code')
@@ -204,8 +213,7 @@ class MKVFile:
         """
         if track_num is None:
             return self.tracks
-        else:
-            return self.tracks[track_num]
+        return self.tracks[track_num]
 
     def move_track_front(self, track_num):
         """Set a track as the first in an MKVFile.
@@ -276,3 +284,206 @@ class MKVFile:
             self.tracks[track_num] = track
         else:
             raise IndexError('track index out of range')
+
+    def split_none(self):
+        self._split_options = []
+
+    def split_size(self, size):
+        """Split the output file into parts by size.
+
+        size (bitmath obj, int):
+            The size of each split file. Takes either a bitmath size object or an integer representing the number of
+            bytes.
+        """
+        if getattr(size, '__module__', None) == bitmath.__name__:
+            size = size.bytes
+        elif not isinstance(size, int):
+            raise TypeError('size is not a bitmath object or integer')
+        self._split_options = ['--split', 'size:{}'.format(size)]
+
+    def split_duration(self, duration):
+        """Split the output file into parts by duration.
+
+        duration (str, int):
+            The duration of each split file. Takes either a str formatted to HH:MM:SS.nnnnnnnnn or an integer
+            representing the number of seconds. The duration string requires formatting of at least M:S.
+        """
+        self._split_options = ['--split', 'duration:' + str(Timestamp(duration))]
+
+    def split_timestamps(self, *timestamps):
+        """Split the output file into parts by timestamps.
+
+        *timestamps (str, int, list, tuple):
+            The timestamps to split the file by. Can be passed as any combination of strs and ints, inside or outside
+            an Iterable object. Any lists will be flattened. Timestamps must be ints, representing seconds, or strs in
+            the form HH:MM:SS.nnnnnnnnn. The timestamp string requires formatting of at least M:S.
+        """
+        # check if in timestamps form
+        ts_flat = MKVFile.flatten(timestamps)
+        if len(ts_flat) == 0:
+            raise ValueError('"{}" are not properly formatted timestamps'.format(timestamps))
+        if None in ts_flat:
+            raise ValueError('"{}" are not properly formatted timestamps'.format(timestamps))
+        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
+            if Timestamp(ts_1) >= Timestamp(ts_2):
+                raise ValueError('"{}" are not properly formatted timestamps'.format(timestamps))
+
+        # build ts_string from timestamps
+        ts_string = 'timestamps:'
+        for ts in ts_flat:
+            ts_string += str(Timestamp(ts)) + ','
+        self._split_options = ['--split', ts_string[:-1]]
+
+    def split_frames(self, *frames):
+        """Split the output file into parts by frames.
+
+        *frames (int, list, tuple):
+            The frames to split the file by. Can be passed as any combination of ints, inside or outside an Iterable
+            object. Any lists will be flattened. Frames must be ints.
+        """
+        # check if in frames form
+        f_flat = MKVFile.flatten(frames)
+        if len(f_flat) == 0:
+            raise ValueError('"{}" are not properly formatted frames'.format(frames))
+        for f in f_flat:
+            if not isinstance(f, int):
+                raise TypeError('frame "{}" not an int'.format(f))
+        for f_1, f_2 in zip(f_flat[:-1], f_flat[1:]):
+            if f_1 >= f_2:
+                raise ValueError('"{}" are not properly formatted frames'.format(frames))
+
+        # build f_string from frames
+        f_string = 'frames:'
+        for f in f_flat:
+            f_string += str(f) + ','
+        self._split_options = ['--split', f_string[:-1]]
+
+    def split_timestamp_parts(self, timestamp_parts):
+        """Split the output in parts by time parts.
+
+        parts (list, tuple):
+            An Iterable of timestamp sets. Each timestamp set should be an Iterable of an even number of timestamps
+            or any number of timestamp pairs. The very first and last timestamps are permitted to be None. Timestamp
+            sets containing 4 or more timestamps will output as one file containing the parts specified.
+        """
+        # check if in parts form
+        ts_flat = MKVFile.flatten(timestamp_parts)
+        if len(timestamp_parts) == 0:
+            raise ValueError('"{}" are not properly formatted parts'.format(timestamp_parts))
+        if None in ts_flat[1:-1]:
+            raise ValueError('"{}" are not properly formatted parts'.format(timestamp_parts))
+        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
+            if None not in (ts_1, ts_2) and Timestamp(ts_1) >= Timestamp(ts_2):
+                raise ValueError('"{}" are not properly formatted parts'.format(timestamp_parts))
+
+        # build ts_string from parts
+        ts_string = 'parts:'
+        for ts_set in timestamp_parts:
+            # flatten set
+            ts_set = MKVFile.flatten(ts_set)
+
+            # check if in set form
+            if not isinstance(ts_set, (list, tuple)):
+                raise TypeError('set is not of type list or tuple')
+            if len(ts_set) < 2 or len(ts_set) % 2 != 0:
+                raise ValueError('"{}" is not a properly formatted set'.format(ts_set))
+
+            # build parts from sets
+            for index, ts in enumerate(ts_set):
+                # check for combined split
+                if index % 2 == 0 and index > 0:
+                    ts_string += '+'
+                # add timestamp if not None
+                if ts is not None:
+                    ts_string += str(Timestamp(ts))
+                # add ',' or '-'
+                ts_string += '-' if index % 2 == 0 else ','
+        self._split_options = ['--split', ts_string[:-1]]
+
+    def split_parts_frames(self, frame_parts):
+        """Split the output in parts by frames.
+
+        parts (list, tuple):
+            An Iterable of frame sets. Each frame set should be an Iterable of an even number of frames or any
+            number of frame pairs. The very first and last frames are permitted to be None. Frame sets containing 4
+            or more frames will output as one file containing the parts specified.
+        """
+        # check if in parts form
+        f_flat = MKVFile.flatten(frame_parts)
+        if len(frame_parts) == 0:
+            raise ValueError('"{}" are not properly formatted parts'.format(frame_parts))
+        if None in f_flat[1:-1]:
+            raise ValueError('"{}" are not properly formatted parts'.format(frame_parts))
+        for f_1, f_2 in zip(f_flat[:-1], f_flat[1:]):
+            if None not in (f_1, f_2) and f_1 >= f_2:
+                raise ValueError('"{}" are not properly formatted parts'.format(frame_parts))
+
+        # build f_string from parts
+        f_string = 'parts:'
+        for f_set in frame_parts:
+            # flatten set
+            f_set = MKVFile.flatten(f_set)
+
+            # check if in set form
+            if not isinstance(f_set, (list, tuple)):
+                raise TypeError('set is not of type list or tuple')
+            if len(f_set) < 2 or len(f_set) % 2 != 0:
+                raise ValueError('"{}" is not a properly formatted set'.format(f_set))
+
+            # build parts from sets
+            for index, f in enumerate(f_set):
+                # check if frames are ints
+                if not isinstance(f, int) and f is not None:
+                    raise TypeError('frame "{}" not an int'.format(f))
+
+                # check for combined split
+                if index % 2 == 0 and index > 0:
+                    f_string += '+'
+                # add frame if not None
+                if f is not None:
+                    f_string += str(f)
+                # add ',' or '-'
+                f_string += '-' if index % 2 == 0 else ','
+        self._split_options = ['--split', f_string[:-1]]
+
+    def split_chapters(self, *chapters):
+        """Split the output file into parts by chapters.
+
+       *chapters (int, list, tuple):
+           The chapters to split the file by. Can be passed as any combination of ints, inside or outside an
+           Iterable object. Any lists will be flattened. Chapters must be ints.
+       """
+        # check if in chapters form
+        c_flat = MKVFile.flatten(chapters)
+        if len(chapters) == 0:
+            self._split_options = ['--split', 'chapters:all']
+            return
+        for c in c_flat:
+            if not isinstance(c, int):
+                raise TypeError('chapter "{}" not an int'.format(c))
+            if c < 1:
+                raise ValueError('"{}" are not properly formatted chapters'.format(chapters))
+        for c_1, c_2 in zip(c_flat[:-1], c_flat[1:]):
+            if c_1 >= c_2:
+                raise ValueError('"{}" are not properly formatted chapters'.format(chapters))
+
+        # build c_string from chapters
+        c_string = 'chapters:'
+        for c in c_flat:
+            c_string += str(c) + ','
+        self._split_options = ['--split', c_string[:-1]]
+
+    @staticmethod
+    def flatten(item):
+        """Flatten a list.
+
+        item (list, tuple):
+            An iterable object with nested iterables to be flattened.
+        """
+        flat_list = []
+        if isinstance(item, (list, tuple)):
+            for item in item:
+                flat_list.extend(MKVFile.flatten(item))
+            return flat_list
+        else:
+            return [item]
