@@ -6,11 +6,11 @@
 import subprocess as sp
 import json
 from os.path import expanduser, isfile
-import re
 
 import bitmath
 
-from pymkv import MKVTrack
+from pymkv.MKVTrack import MKVTrack
+from pymkv.Timestamp import Timestamp
 
 
 class MKVFile:
@@ -304,12 +304,7 @@ class MKVFile:
             The duration of each split file. Takes either a str formatted to HH:MM:SS.nnnnnnnnn or an integer
             representing the number of seconds. The duration string requires formatting of at least M:S.
         """
-        if isinstance(duration, str) and MKVFile.check_ts(duration):
-            self._split_options = ['--split', 'duration:' + duration]
-        elif isinstance(duration, int):
-            self._split_options = ['--split', 'duration:{}s'.format(duration)]
-        else:
-            raise TypeError('duration is not a valid string or integer')
+        self._split_options = ['--split', 'duration:' + str(Timestamp(duration))]
 
     def split_timestamps(self, *timestamps):
         """Split the output file into parts by timestamps.
@@ -319,61 +314,102 @@ class MKVFile:
             an Iterable object. Any lists will be flattened. Timestamps must be ints, representing seconds, or strs in
             the form HH:MM:SS.nnnnnnnnn. The timestamp string requires formatting of at least M:S.
         """
-        if len(timestamps) == 0:
-            raise ValueError('no timestamps given')
-        timestamps = MKVFile.flatten(timestamps)
+        # check if in timestamps form
+        ts_flat = MKVFile.flatten(timestamps)
+        if len(ts_flat) == 0:
+            raise ValueError('"{}" are not properly formatted timestamps'.format(timestamps))
+        if None in ts_flat:
+            raise ValueError('"{}" are not properly formatted timestamps'.format(timestamps))
+        for ts_1, ts_2 in zip(MKVFile.flatten(ts_flat)[:-1], MKVFile.flatten(ts_flat)[1:]):
+            if Timestamp(ts_1) >= Timestamp(ts_2):
+                raise ValueError('"{}" are not properly formatted timestamps'.format(timestamps))
+
+        # build ts_string from timestamps
         ts_string = 'timestamps:'
-        for ts in timestamps:
-            if isinstance(ts, int):
-                ts_string += '{}s'.format(ts) + ','
-            elif isinstance(ts, str) and MKVFile.check_ts(ts):
-                ts_string += ts + ','
-            elif not isinstance(ts, int) and not isinstance(ts, str):
-                raise TypeError('timestamp is not of type int or str')
-            else:
-                raise ValueError('"{}" is not a properly formatted str'.format(ts))
+        for ts in ts_flat:
+            ts_string += str(Timestamp(ts)) + ','
         self._split_options = ['--split', ts_string[:-1]]
 
     def split_parts(self, parts):
-        """Split the output in parts by parts.
+        """Split the output in parts by time parts.
 
         parts (list, tuple):
-            An iterable of timestamp pairs. Each timestamp pair should be an iterable of two timestamps. The very
+            An iterable of timestamp pairs. Each timestamp set should be an iterable of two timestamps. The very
             first and last timestamps are permitted to be None. Also accepts timestamps with a '+' sign at the
             beginning.
         """
+        # check if in parts form
+        ts_flat = MKVFile.flatten(parts)
         if len(parts) == 0:
-            raise ValueError('no timestamps given')
+            raise ValueError('"{}" are not properly formatted parts'.format(parts))
+        if None in ts_flat[1:-1]:
+            raise ValueError('"{}" are not properly formatted parts'.format(parts))
+        for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
+            if None not in (ts_1, ts_2) and Timestamp(ts_1) >= Timestamp(ts_2):
+                raise ValueError('"{}" are not properly formatted parts'.format(parts))
+
+        # build ts_string from parts
         ts_string = 'parts:'
+        for ts_set in parts:
+            # flatten set
+            ts_set = MKVFile.flatten(ts_set)
 
-        # build pairs
-        for pair in parts:
-            # check if in pair form
-            if not isinstance(pair, (list, tuple)) or len(pair) != 2:
-                raise ValueError('"{}" is not a properly formatted pair'.format(pair))
-            # check for properly formatted timestamps
-            if pair[0] is not None and not MKVFile.check_ts(pair[0], plus=True):
-                raise ValueError('"{}" is not a properly formatted pair'.format(pair))
-            if pair[1] is not None and not MKVFile.check_ts(pair[1]):
-                raise ValueError('"{}" is not a properly formatted pair'.format(pair))
-            # check for identical pair values
-            if pair[0] == pair[1]:
-                raise ValueError('"{}" is not a properly formatted pair'.format(pair))
+            # check if in set form
+            if not isinstance(ts_set, (list, tuple)):
+                raise TypeError('set is not of type list or tuple')
+            if len(ts_set) < 2 or len(ts_set) % 2 != 0:
+                raise ValueError('"{}" is not a properly formatted set'.format(ts_set))
 
-            # first pair value
-            if isinstance(pair[0], int):
-                ts_string += str(pair[0]) + 's'
-            elif pair[0] is not None:
-                ts_string += pair[0]
-            ts_string += '-'
-            # second pair value
-            if isinstance(pair[1], int):
-                ts_string += str(pair[1]) + 's'
-            elif pair[1] is not None:
-                ts_string += pair[1]
-            ts_string += ','
-
+            # build parts from sets
+            for index, ts in enumerate(ts_set):
+                # check for combined split
+                if index % 2 == 0 and index > 0:
+                    ts_string += '+'
+                # add timestamp if not None
+                if ts is not None:
+                    ts_string += str(Timestamp(ts))
+                # add ',' or '-'
+                ts_string += '-' if index % 2 == 0 else ','
         self._split_options = ['--split', ts_string[:-1]]
+
+    def split_parts_frames(self, frame_parts):
+        # check if in parts form
+        f_flat = MKVFile.flatten(frame_parts)
+        if len(frame_parts) == 0:
+            raise ValueError('"{}" are not properly formatted parts'.format(frame_parts))
+        if None in f_flat[1:-1]:
+            raise ValueError('"{}" are not properly formatted parts'.format(frame_parts))
+        for f_1, f_2 in zip(f_flat[:-1], f_flat[1:]):
+            if None not in (f_1, f_2) and f_1 >= f_2:
+                raise ValueError('"{}" are not properly formatted parts'.format(frame_parts))
+
+        # build f_string from parts
+        f_string = 'parts:'
+        for f_set in frame_parts:
+            # flatten set
+            f_set = MKVFile.flatten(f_set)
+
+            # check if in set form
+            if not isinstance(f_set, (list, tuple)):
+                raise TypeError('set is not of type list or tuple')
+            if len(f_set) < 2 or len(f_set) % 2 != 0:
+                raise ValueError('"{}" is not a properly formatted set'.format(f_set))
+
+            # build parts from sets
+            for index, f in enumerate(f_set):
+                # check if frames are ints
+                if not isinstance(f, int) and f is not None:
+                    raise TypeError('frame "{}" not an int'.format(f))
+
+                # check for combined split
+                if index % 2 == 0 and index > 0:
+                    f_string += '+'
+                # add frame if not None
+                if f is not None:
+                    f_string += str(f)
+                # add ',' or '-'
+                f_string += '-' if index % 2 == 0 else ','
+        self._split_options = ['--split', f_string[:-1]]
 
     @staticmethod
     def flatten(item):
@@ -389,27 +425,3 @@ class MKVFile:
             return flat_list
         else:
             return [item]
-
-    @staticmethod
-    def check_ts(timestamp, plus=False):
-        """Check for a valid timestamp.
-
-        timestamp (str, int):
-            The timestamp to verify. Takes either a str formatted to HH:MM:SS.nnnnnnnnn or an integer
-            representing the number of seconds. The timestamp string requires formatting of at least M:S.
-        plus (bool):
-            Determines if a '+' sign should be allowed at the beginning of the timestamp. Defaults to False.
-        """
-        if isinstance(timestamp, str):
-            print(timestamp)
-            # TODO: add plus to regex
-            if re.match('^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', timestamp):
-                return True
-            elif plus and re.match('^\+?[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', timestamp):
-                return
-            else:
-                return False
-        elif isinstance(timestamp, int):
-            return True
-        else:
-            return False

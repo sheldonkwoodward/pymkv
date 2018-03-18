@@ -34,6 +34,7 @@ class MKVTrack:
         self.language = language
         self.track_name = track_name
         self.exclude_chapters = exclude_chapters
+        # TODO: make track_id a property
         self.track_id = track_id
         info_json = json.loads(sp.check_output([mkvmerge_path, '-J', self.path]).decode('utf8'))
         self.track_type = info_json['tracks'][self.track_id]['type']
