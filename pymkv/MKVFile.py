@@ -82,9 +82,9 @@ class MKVFile:
         # add tracks
         for track in self.tracks:
             # flags
-            if track.track_name:
+            if track.track_name is not None:
                 command.extend(['--track-name', str(track.track_id) + ':' + track.track_name])
-            if track.language:
+            if track.language is not None:
                 command.extend(['--language', str(track.track_id) + ':' + track.language])
             if not track.default_track:
                 command.extend(['--default-track', str(track.track_id) + ':0'])
@@ -113,9 +113,9 @@ class MKVFile:
             command.append(track.path)
 
         # chapters
-        if self.chapter_language:
+        if self.chapter_language is not None:
             command.extend(['--chapter-language', self.chapter_language])
-        if self.chapters:
+        if self.chapters is not None:
             command.extend(['--chapters', self.chapters])
 
         # split options
