@@ -288,7 +288,7 @@ class MKVFile:
     def split_none(self):
         self._split_options = []
 
-    def split_size(self, size):
+    def split_size(self, size, link=False):
         """Split the output file into parts by size.
 
         size (bitmath obj, int):
@@ -300,8 +300,10 @@ class MKVFile:
         elif not isinstance(size, int):
             raise TypeError('size is not a bitmath object or integer')
         self._split_options = ['--split', 'size:{}'.format(size)]
+        if link:
+            self._split_options += '--link'
 
-    def split_duration(self, duration):
+    def split_duration(self, duration, link=False):
         """Split the output file into parts by duration.
 
         duration (str, int):
@@ -309,8 +311,10 @@ class MKVFile:
             representing the number of seconds. The duration string requires formatting of at least M:S.
         """
         self._split_options = ['--split', 'duration:' + str(Timestamp(duration))]
+        if link:
+            self._split_options += '--link'
 
-    def split_timestamps(self, *timestamps):
+    def split_timestamps(self, *timestamps, link=False):
         """Split the output file into parts by timestamps.
 
         *timestamps (str, int, list, tuple):
@@ -333,8 +337,10 @@ class MKVFile:
         for ts in ts_flat:
             ts_string += str(Timestamp(ts)) + ','
         self._split_options = ['--split', ts_string[:-1]]
+        if link:
+            self._split_options += '--link'
 
-    def split_frames(self, *frames):
+    def split_frames(self, *frames, link=False):
         """Split the output file into parts by frames.
 
         *frames (int, list, tuple):
@@ -357,8 +363,10 @@ class MKVFile:
         for f in f_flat:
             f_string += str(f) + ','
         self._split_options = ['--split', f_string[:-1]]
+        if link:
+            self._split_options += '--link'
 
-    def split_timestamp_parts(self, timestamp_parts):
+    def split_timestamp_parts(self, timestamp_parts, link=False):
         """Split the output in parts by time parts.
 
         parts (list, tuple):
@@ -399,8 +407,10 @@ class MKVFile:
                 # add ',' or '-'
                 ts_string += '-' if index % 2 == 0 else ','
         self._split_options = ['--split', ts_string[:-1]]
+        if link:
+            self._split_options += '--link'
 
-    def split_parts_frames(self, frame_parts):
+    def split_parts_frames(self, frame_parts, link=False):
         """Split the output in parts by frames.
 
         parts (list, tuple):
@@ -445,8 +455,10 @@ class MKVFile:
                 # add ',' or '-'
                 f_string += '-' if index % 2 == 0 else ','
         self._split_options = ['--split', f_string[:-1]]
+        if link:
+            self._split_options += '--link'
 
-    def split_chapters(self, *chapters):
+    def split_chapters(self, *chapters, link=False):
         """Split the output file into parts by chapters.
 
        *chapters (int, list, tuple):
@@ -472,6 +484,8 @@ class MKVFile:
         for c in c_flat:
             c_string += str(c) + ','
         self._split_options = ['--split', c_string[:-1]]
+        if link:
+            self._split_options += '--link'
 
     @staticmethod
     def flatten(item):
