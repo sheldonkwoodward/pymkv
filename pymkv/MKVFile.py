@@ -41,6 +41,7 @@ class MKVFile:
         self.tracks = []
         self.path = None
         if path is not None:
+            # TODO: verify file is matroska
             self.path = expanduser(path)
 
             # add file title
@@ -63,6 +64,8 @@ class MKVFile:
 
         # options
         self._split_options = []
+        self._link_to_previous_options = []
+        self._link_to_next_options = []
 
     def command(self, output_file, subprocess=False):
         """Generates an mkvmerge command based on the configured MKVFile.
@@ -76,6 +79,7 @@ class MKVFile:
             Returns the command to create the specified MKV file. Return type is str by default. Will return as list if
             subprocess is true.
         """
+        # TODO: verify file is matroska
         command = [self.mkvmerge_path, '-o', expanduser(output_file)]
         if self.title:
             command.extend(['--title', self.title])
@@ -120,6 +124,8 @@ class MKVFile:
 
         # split options
         command.extend(self._split_options)
+        command.extend(self._link_to_previous_options)
+        command.extend(self._link_to_next_options)
 
         if subprocess:
             return command
@@ -133,6 +139,7 @@ class MKVFile:
         silent (bool):
             By default the mkvmerge output will be shown unless silent is True.
         """
+        # TODO: verify file is matroska
         if silent:
             sp.check_output(self.command(expanduser(output_file), subprocess=True))
         else:
@@ -486,6 +493,28 @@ class MKVFile:
         self._split_options = ['--split', c_string[:-1]]
         if link:
             self._split_options += '--link'
+
+    def link_to_previous(self, file):
+        # check if valid file
+        if not isinstance(str, file):
+            raise TypeError('"{}" is not of type str'.format(file))
+        file = expanduser(file)
+        if not isfile(file):
+            raise ValueError('"{}" is not a file'.format(file))
+
+        # TODO: verify file is matroska
+        self._link_to_previous_options = ['--link-to-previous', '=' + file]
+
+    def link_to_next(self, file):
+        # check if valid file
+        if not isinstance(file, str):
+            raise TypeError('"{}" is not of type str'.format(file))
+        file = expanduser(file)
+        if not isfile(file):
+            raise ValueError('"{}" is not a file'.format(file))
+
+        # TODO: verify file is matroska
+        self._link_to_next_options = ['--link-to-next', '=' + file]
 
     @staticmethod
     def flatten(item):
