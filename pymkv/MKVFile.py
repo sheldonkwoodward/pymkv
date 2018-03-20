@@ -15,7 +15,7 @@ from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
 
 
 class MKVFile:
-    def __init__(self, path=None, title=None):
+    def __init__(self, file_path=None, title=None):
         """A class that represents an MKV file.
 
         The MKVFile class can either import a pre-existing MKV file or create a new one. After an MKVFile object has
@@ -40,9 +40,10 @@ class MKVFile:
         self.chapter_language = None
         self.tracks = []
         self.path = None
-        if path is not None:
-            # TODO: verify file is matroska
-            self.path = expanduser(path)
+        if file_path is not None:
+            self.path = expanduser(file_path)
+            if not MKVFile.verify_matroska(self.path):
+                raise ValueError('"{}" is not a matroska file'.format(self.path))
 
             # add file title
             info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.path]).decode('utf8'))
@@ -67,7 +68,7 @@ class MKVFile:
         self._link_to_previous_options = []
         self._link_to_next_options = []
 
-    def command(self, output_file, subprocess=False):
+    def command(self, output_path, subprocess=False):
         """Generates an mkvmerge command based on the configured MKVFile.
 
         output_file (str):
@@ -79,8 +80,10 @@ class MKVFile:
             Returns the command to create the specified MKV file. Return type is str by default. Will return as list if
             subprocess is true.
         """
-        # TODO: verify file is matroska
-        command = [self.mkvmerge_path, '-o', expanduser(output_file)]
+        output_path = expanduser(output_path)
+        if not MKVFile.verify_matroska(self.path):
+            raise ValueError('"{}" is not a matroska file'.format(output_path))
+        command = [self.mkvmerge_path, '-o', output_path]
         if self.title:
             command.extend(['--title', self.title])
         # add tracks
@@ -131,7 +134,7 @@ class MKVFile:
             return command
         return " ".join(command)
 
-    def mux(self, output_file, silent=False):
+    def mux(self, output_path, silent=False):
         """Muxes the specified MKVFile.
 
         output_file (str):
@@ -139,13 +142,15 @@ class MKVFile:
         silent (bool):
             By default the mkvmerge output will be shown unless silent is True.
         """
-        # TODO: verify file is matroska
+        output_path = expanduser(output_path)
+        if not MKVFile.verify_matroska(self.path):
+            raise ValueError('"{}" is not a matroska file'.format(output_path))
         if silent:
-            sp.check_output(self.command(expanduser(output_file), subprocess=True))
+            sp.check_output(self.command(output_path, subprocess=True))
         else:
-            command = self.command(expanduser(output_file))
+            command = self.command(output_path)
             print('Running with command:\n"' + command + '"')
-            sp.run(self.command(expanduser(output_file), subprocess=True))
+            sp.run(self.command(output_path, subprocess=True))
 
     def add_track(self, track, track_name=None):
         """Add an MKVTrack to the MKVFile.
@@ -494,27 +499,23 @@ class MKVFile:
         if link:
             self._split_options += '--link'
 
-    def link_to_previous(self, file):
+    def link_to_previous(self, file_path):
         # check if valid file
-        if not isinstance(str, file):
-            raise TypeError('"{}" is not of type str'.format(file))
-        file = expanduser(file)
-        if not isfile(file):
-            raise ValueError('"{}" is not a file'.format(file))
+        if not isinstance(str, file_path):
+            raise TypeError('"{}" is not of type str'.format(file_path))
+        file_path = expanduser(file_path)
+        if not MKVFile.verify_matroska(file_path):
+            raise ValueError('"{}" is not a matroska file'.format(file_path))
+        self._link_to_previous_options = ['--link-to-previous', '=' + file_path]
 
-        # TODO: verify file is matroska
-        self._link_to_previous_options = ['--link-to-previous', '=' + file]
-
-    def link_to_next(self, file):
+    def link_to_next(self, file_path):
         # check if valid file
-        if not isinstance(file, str):
-            raise TypeError('"{}" is not of type str'.format(file))
-        file = expanduser(file)
-        if not isfile(file):
-            raise ValueError('"{}" is not a file'.format(file))
-
-        # TODO: verify file is matroska
-        self._link_to_next_options = ['--link-to-next', '=' + file]
+        if not isinstance(file_path, str):
+            raise TypeError('"{}" is not of type str'.format(file_path))
+        file_path = expanduser(file_path)
+        if not MKVFile.verify_matroska(file_path):
+            raise ValueError('"{}" is not a matroska file'.format(file_path))
+        self._link_to_next_options = ['--link-to-next', '=' + file_path]
 
     @staticmethod
     def flatten(item):
