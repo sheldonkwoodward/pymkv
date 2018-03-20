@@ -298,6 +298,7 @@ class MKVFile:
             raise IndexError('track index out of range')
 
     def split_none(self):
+        """Remove all splitting options."""
         self._split_options = []
 
     def split_size(self, size, link=False):
@@ -499,7 +500,17 @@ class MKVFile:
         if link:
             self._split_options += '--link'
 
+    def link_to_none(self):
+        """Remove all linking to previous and next options."""
+        self._link_to_previous_options = []
+        self._link_to_next_options = []
+
     def link_to_previous(self, file_path):
+        """Link the output file as the predecessor of the file_path file.
+
+        file_path (str):
+            Path of the file to be linked to.
+        """
         # check if valid file
         if not isinstance(str, file_path):
             raise TypeError('"{}" is not of type str'.format(file_path))
@@ -509,6 +520,11 @@ class MKVFile:
         self._link_to_previous_options = ['--link-to-previous', '=' + file_path]
 
     def link_to_next(self, file_path):
+        """Link the output file as the successor of the file_path file.
+
+        file_path (str):
+            Path of the file to be linked to.
+        """
         # check if valid file
         if not isinstance(file_path, str):
             raise TypeError('"{}" is not of type str'.format(file_path))
@@ -534,6 +550,15 @@ class MKVFile:
 
     @staticmethod
     def verify_matroska(file_path, mkvmerge_path='mkvmerge'):
+        """Verify a file is a Matroska file.
+
+        file_path (str):
+            Path of the file to be verified.
+        mkvmerge_path (str):
+            Alternate path to mkvmerge if it is not already in the $PATH variable.
+        """
+        if not isinstance(file_path, str):
+            raise TypeError('"{}" is not of type str'.format(file_path))
         try:
             info_json = json.loads(sp.check_output([mkvmerge_path, '-J', expanduser(file_path)]).decode('utf8'))
         except sp.CalledProcessError:
