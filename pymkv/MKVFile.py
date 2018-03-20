@@ -530,3 +530,13 @@ class MKVFile:
             return flat_list
         else:
             return [item]
+
+    @staticmethod
+    def verify_matroska(file_path, mkvmerge_path='mkvmerge'):
+        try:
+            info_json = json.loads(sp.check_output([mkvmerge_path, '-J', expanduser(file_path)]).decode('utf8'))
+        except sp.CalledProcessError:
+            return False
+        if info_json['container']['type'] == 'Matroska':
+            return True
+        return False
