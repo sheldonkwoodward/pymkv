@@ -39,28 +39,27 @@ class MKVFile:
         self.chapters = None
         self.chapter_language = None
         self.tracks = []
-        self.path = None
         if file_path is not None:
-            self.path = expanduser(file_path)
-            if not MKVFile.verify_matroska(self.path):
-                raise ValueError('"{}" is not a matroska file'.format(self.path))
+            file_path = expanduser(file_path)
+            if not MKVFile.verify_matroska(file_path):
+                raise ValueError('"{}" is not a matroska file'.format(file_path))
 
             # add file title
-            info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.path]).decode('utf8'))
+            info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', file_path]).decode('utf8'))
             if not self.title and 'title' in info_json['container']['properties']:
                 self.title = info_json['container']['properties']['title']
 
             # add tracks with info
             for track in info_json['tracks']:
-                new_track = MKVTrack(self.path, track_id=track['id'])
+                new_track = MKVTrack(file_path, track_id=track['id'])
+                if 'track_name' in track['properties']:
+                    new_track.track_name = track['properties']['track_name']
+                if 'language' in track['properties']:
+                    new_track.language = track['properties']['language']
                 if 'default_track' in track['properties']:
                     new_track.default_track = track['properties']['default_track']
                 if 'forced_track' in track['properties']:
                     new_track.forced_track = track['properties']['forced_track']
-                if 'language' in track['properties']:
-                    new_track.language = track['properties']['language']
-                if 'track_name' in track['properties']:
-                    new_track.track_name = track['properties']['track_name']
                 self.add_track(new_track)
 
         # options
@@ -81,8 +80,6 @@ class MKVFile:
             subprocess is true.
         """
         output_path = expanduser(output_path)
-        if not MKVFile.verify_matroska(self.path):
-            raise ValueError('"{}" is not a matroska file'.format(output_path))
         command = [self.mkvmerge_path, '-o', output_path]
         if self.title:
             command.extend(['--title', self.title])
@@ -117,7 +114,7 @@ class MKVFile:
                 command.append('--no-chapters')
 
             # add path
-            command.append(track.path)
+            command.append(track.file_path)
 
         # chapters
         if self.chapter_language is not None:
@@ -143,8 +140,6 @@ class MKVFile:
             By default the mkvmerge output will be shown unless silent is True.
         """
         output_path = expanduser(output_path)
-        if not MKVFile.verify_matroska(self.path):
-            raise ValueError('"{}" is not a matroska file'.format(output_path))
         if silent:
             sp.check_output(self.command(output_path, subprocess=True))
         else:
@@ -152,20 +147,15 @@ class MKVFile:
             print('Running with command:\n"' + command + '"')
             sp.run(self.command(output_path, subprocess=True))
 
-    def add_track(self, track, track_name=None):
+    def add_track(self, track):
         """Add an MKVTrack to the MKVFile.
 
         track (str, MKVTrack):
             The MKVTrack to be added the MKVFile.
-        track_name (str, optional):
-            The name of the new track. Will override any previous name.
         """
         if isinstance(track, str):
-            new_track = MKVTrack(track, track_name=track_name)
-            self.tracks.append(new_track)
+            self.tracks.append(MKVTrack(track))
         elif isinstance(track, MKVTrack):
-            if track_name:
-                track.track_name = track_name
             self.tracks.append(track)
         else:
             raise TypeError('track is not str or MKVTrack')
@@ -562,7 +552,6 @@ class MKVFile:
         try:
             info_json = json.loads(sp.check_output([mkvmerge_path, '-J', expanduser(file_path)]).decode('utf8'))
         except sp.CalledProcessError:
+            # TODO: refactor to raise error
             return False
-        if info_json['container']['type'] == 'Matroska':
-            return True
-        return False
+        return info_json['container']['type'] == 'Matroska'
