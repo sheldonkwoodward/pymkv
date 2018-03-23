@@ -36,7 +36,7 @@ class MKVFile:
         """
         self.mkvmerge_path = 'mkvmerge'
         self.title = title
-        self.chapters = None
+        self.chapters_file = None
         self.chapter_language = None
         self.tracks = []
         if file_path is not None:
@@ -119,8 +119,8 @@ class MKVFile:
         # chapters
         if self.chapter_language is not None:
             command.extend(['--chapter-language', self.chapter_language])
-        if self.chapters is not None:
-            command.extend(['--chapters', self.chapters])
+        if self.chapters_file is not None:
+            command.extend(['--chapters', self.chapters_file])
 
         # split options
         command.extend(self._split_options)
@@ -174,7 +174,7 @@ class MKVFile:
         else:
             raise TypeError('track is not str or MKVFile')
 
-    def add_chapters(self, chapters, language=None):
+    def add_chapters(self, file_path, language=None):
         """Add a chapters file to an MKVFile.
 
         chapters (str):
@@ -182,14 +182,16 @@ class MKVFile:
         language (str, optional):
             Must be an ISO639-2 language code. Only works if no existing language information exists in chapters.
         """
-        self.chapters = expanduser(chapters)
-        if not isfile(self.chapters):
-            raise FileNotFoundError('file specified does not exist')
-        if language:
-            if language in LANGUAGES:
+        if not isinstance(file_path, str):
+            raise TypeError('"{}" is not of type str'.format(file_path))
+        file_path = expanduser(file_path)
+        if not isfile(file_path):
+            raise FileNotFoundError('"{}" does not exist'.format(file_path))
+        self.chapters_file = file_path
+        if language is not None and language not in LANGUAGES:
+            raise ValueError('not an ISO639-2 language code')
+        elif language is not None and language in LANGUAGES:
                 self.chapter_language = language
-            else:
-                raise ValueError('not an ISO639-2 language code')
 
     def remove_track(self, track_num):
         """Remove a track from the MKVFile.

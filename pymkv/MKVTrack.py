@@ -96,6 +96,8 @@ class MKVTrack:
         if not isinstance(file_path, str):
             raise TypeError('"{}" is not of type str'.format(file_path))
         file_path = expanduser(file_path)
+        if not isfile(file_path):
+            raise FileNotFoundError('"{}" does not exist'.format(file_path))
         try:
             info_json = json.loads(sp.check_output([mkvmerge_path, '-J', file_path]).decode('utf8'))
         except sp.CalledProcessError:
@@ -107,6 +109,8 @@ class MKVTrack:
         if not isinstance(file_path, str):
             raise TypeError('"{}" is not of type str'.format(file_path))
         file_path = expanduser(file_path)
+        if not isfile(file_path):
+            raise FileNotFoundError('"{}" does not exist'.format(file_path))
         try:
             info_json = json.loads(sp.check_output([mkvmerge_path, '-J', file_path]).decode('utf8'))
         except sp.CalledProcessError:
