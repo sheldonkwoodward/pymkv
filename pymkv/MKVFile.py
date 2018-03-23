@@ -45,6 +45,7 @@ class MKVFile:
                 raise ValueError('"{}" is not a matroska file'.format(file_path))
 
             # add file title
+            # TODO: change to properties
             info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', file_path]).decode('utf8'))
             if not self.title and 'title' in info_json['container']['properties']:
                 self.title = info_json['container']['properties']['title']
@@ -167,8 +168,7 @@ class MKVFile:
             The MKVFile to be combined with the MKVFile.
         """
         if isinstance(file, str):
-            new_file = MKVFile(file)
-            self.tracks = self.tracks + new_file.tracks
+            self.tracks = self.tracks + MKVFile(file).tracks
         elif isinstance(file, MKVFile):
             self.tracks = self.tracks + file.tracks
         else:
