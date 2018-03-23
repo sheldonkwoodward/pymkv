@@ -193,17 +193,6 @@ class MKVFile:
         elif language is not None and language in LANGUAGES:
                 self.chapter_language = language
 
-    def remove_track(self, track_num):
-        """Remove a track from the MKVFile.
-
-        track_num (int):
-            The track number of the track to remove.
-        """
-        if 0 <= track_num < len(self.tracks):
-            del self.tracks[track_num]
-        else:
-            raise IndexError('track index out of range')
-
     def exclude_internal_chapters(self):
         """Ignore the internal subtitles of the MKVFile"""
         for track in self.tracks:
@@ -286,6 +275,17 @@ class MKVFile:
         """
         if 0 <= track_num < len(self.tracks):
             self.tracks[track_num] = track
+        else:
+            raise IndexError('track index out of range')
+
+    def remove_track(self, track_num):
+        """Remove a track from the MKVFile.
+
+        track_num (int):
+            The track number of the track to remove.
+        """
+        if 0 <= track_num < len(self.tracks):
+            del self.tracks[track_num]
         else:
             raise IndexError('track index out of range')
 
