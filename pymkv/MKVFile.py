@@ -3,17 +3,19 @@
 
 """MKVFile Class"""
 
-import subprocess as sp
 import json
 from os.path import expanduser, isfile
+import subprocess as sp
 
 import bitmath
 
 from pymkv.MKVTrack import MKVTrack
 from pymkv.Timestamp import Timestamp
 from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
+from pymkv.Verifications import verify_matroska, verify_mkvmerge
 
 
+# TODO: check for right uses of call, check_call, and check_output
 class MKVFile:
     def __init__(self, file_path=None, title=None):
         """A class that represents an MKV file.
@@ -39,15 +41,15 @@ class MKVFile:
         self.chapters_file = None
         self.chapter_language = None
         self.tracks = []
-        if file_path is not None:
-            file_path = expanduser(file_path)
-            if not MKVFile.verify_matroska(file_path):
-                raise ValueError('"{}" is not a matroska file'.format(file_path))
-
+        if file_path is not None and not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
+            raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change the mkvmerge_path '
+                                    'property')
+        if file_path is not None and verify_matroska(file_path):
             # add file title
             # TODO: change to properties
-            info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', file_path]).decode('utf8'))
-            if not self.title and 'title' in info_json['container']['properties']:
+            file_path = expanduser(file_path)
+            info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', file_path]).decode())
+            if self.title is not None and 'title' in info_json['container']['properties']:
                 self.title = info_json['container']['properties']['title']
 
             # add tracks with info
@@ -140,6 +142,9 @@ class MKVFile:
         silent (bool):
             By default the mkvmerge output will be shown unless silent is True.
         """
+        if not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
+            raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change the mkvmerge_path '
+                                    'property')
         output_path = expanduser(output_path)
         if silent:
             sp.check_output(self.command(output_path, subprocess=True))
@@ -507,7 +512,7 @@ class MKVFile:
         if not isinstance(str, file_path):
             raise TypeError('"{}" is not of type str'.format(file_path))
         file_path = expanduser(file_path)
-        if not MKVFile.verify_matroska(file_path):
+        if not verify_matroska(file_path):
             raise ValueError('"{}" is not a matroska file'.format(file_path))
         self._link_to_previous_options = ['--link-to-previous', '=' + file_path]
 
@@ -521,13 +526,13 @@ class MKVFile:
         if not isinstance(file_path, str):
             raise TypeError('"{}" is not of type str'.format(file_path))
         file_path = expanduser(file_path)
-        if not MKVFile.verify_matroska(file_path):
+        if not verify_matroska(file_path):
             raise ValueError('"{}" is not a matroska file'.format(file_path))
         self._link_to_next_options = ['--link-to-next', '=' + file_path]
 
     @staticmethod
     def flatten(item):
-        """Flatten a list.
+        """Flatten a list or a tuple.
 
         item (list, tuple):
             An iterable object with nested iterables to be flattened.
@@ -539,21 +544,3 @@ class MKVFile:
             return flat_list
         else:
             return [item]
-
-    @staticmethod
-    def verify_matroska(file_path, mkvmerge_path='mkvmerge'):
-        """Verify a file is a Matroska file.
-
-        file_path (str):
-            Path of the file to be verified.
-        mkvmerge_path (str):
-            Alternate path to mkvmerge if it is not already in the $PATH variable.
-        """
-        if not isinstance(file_path, str):
-            raise TypeError('"{}" is not of type str'.format(file_path))
-        try:
-            info_json = json.loads(sp.check_output([mkvmerge_path, '-J', expanduser(file_path)]).decode('utf8'))
-        except sp.CalledProcessError:
-            # TODO: refactor to raise error
-            return False
-        return info_json['container']['type'] == 'Matroska'

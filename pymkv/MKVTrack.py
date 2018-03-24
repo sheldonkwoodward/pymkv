@@ -3,11 +3,12 @@
 
 """MKVTrack Class"""
 
-import subprocess as sp
 import json
-from os.path import expanduser, isfile
+from os.path import expanduser
+import subprocess as sp
 
 from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
+from pymkv.Verifications import verify_supported
 
 
 class MKVTrack:
@@ -54,7 +55,7 @@ class MKVTrack:
     @file_path.setter
     def file_path(self, file_path):
         file_path = expanduser(file_path)
-        if not MKVTrack.supported(file_path):
+        if not verify_supported(file_path):
             raise ValueError('"{}" is not a supported file')
         self._file_path = file_path
         self.track_id = 0
@@ -65,7 +66,7 @@ class MKVTrack:
 
     @track_id.setter
     def track_id(self, track_id):
-        info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.file_path]).decode('utf8'))
+        info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', self.file_path]).decode())
         if not 0 <= track_id < len(info_json['tracks']):
             raise IndexError('track index out of range')
         self._track_id = track_id
@@ -90,29 +91,3 @@ class MKVTrack:
             self._language = language
         else:
             raise ValueError('not an ISO639-2 language code')
-
-    @staticmethod
-    def recognized(file_path, mkvmerge_path='mkvmerge'):
-        if not isinstance(file_path, str):
-            raise TypeError('"{}" is not of type str'.format(file_path))
-        file_path = expanduser(file_path)
-        if not isfile(file_path):
-            raise FileNotFoundError('"{}" does not exist'.format(file_path))
-        try:
-            info_json = json.loads(sp.check_output([mkvmerge_path, '-J', file_path]).decode('utf8'))
-        except sp.CalledProcessError:
-            raise ValueError('"{}" could not be opened')
-        return info_json['container']['recognized']
-
-    @staticmethod
-    def supported(file_path, mkvmerge_path='mkvmerge'):
-        if not isinstance(file_path, str):
-            raise TypeError('"{}" is not of type str'.format(file_path))
-        file_path = expanduser(file_path)
-        if not isfile(file_path):
-            raise FileNotFoundError('"{}" does not exist'.format(file_path))
-        try:
-            info_json = json.loads(sp.check_output([mkvmerge_path, '-J', file_path]).decode('utf8'))
-        except sp.CalledProcessError:
-            raise ValueError('"{}" could not be opened')
-        return info_json['container']['supported']
