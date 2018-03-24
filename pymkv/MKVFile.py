@@ -4,6 +4,7 @@
 """MKVFile Class"""
 
 import json
+from os import devnull
 from os.path import expanduser, isfile
 import subprocess as sp
 
@@ -15,7 +16,6 @@ from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
 from pymkv.Verifications import verify_matroska, verify_mkvmerge
 
 
-# TODO: check for right uses of call, check_call, and check_output
 class MKVFile:
     def __init__(self, file_path=None, title=None):
         """A class that represents an MKV file.
@@ -147,7 +147,7 @@ class MKVFile:
                                     'property')
         output_path = expanduser(output_path)
         if silent:
-            sp.check_output(self.command(output_path, subprocess=True))
+            sp.run(self.command(output_path, subprocess=True), stdout=open(devnull, 'wb'))
         else:
             command = self.command(output_path)
             print('Running with command:\n"' + command + '"')
