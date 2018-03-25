@@ -38,18 +38,17 @@ class MKVFile:
         """
         self.mkvmerge_path = 'mkvmerge'
         self.title = title
-        self.chapters_file = None
-        self.chapter_language = None
+        self._chapters_file = None
+        self._chapter_language = None
         self.tracks = []
         if file_path is not None and not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
             raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change the mkvmerge_path '
                                     'property')
         if file_path is not None and verify_matroska(file_path):
             # add file title
-            # TODO: change to properties
             file_path = expanduser(file_path)
             info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', file_path]).decode())
-            if self.title is not None and 'title' in info_json['container']['properties']:
+            if self.title is None and 'title' in info_json['container']['properties']:
                 self.title = info_json['container']['properties']['title']
 
             # add tracks with info
@@ -65,10 +64,20 @@ class MKVFile:
                     new_track.forced_track = track['properties']['forced_track']
                 self.add_track(new_track)
 
-        # options
+        # additional options
         self._split_options = []
         self._link_to_previous_options = []
         self._link_to_next_options = []
+
+    @property
+    def chapter_language(self):
+        return self._chapter_language
+
+    @chapter_language.setter
+    def chapter_language(self, language):
+        if language is not None and language not in LANGUAGES:
+            raise ValueError('not an ISO639-2 language code')
+        self._chapter_language = language
 
     def command(self, output_path, subprocess=False):
         """Generates an mkvmerge command based on the configured MKVFile.
@@ -120,10 +129,10 @@ class MKVFile:
             command.append(track.file_path)
 
         # chapters
-        if self.chapter_language is not None:
-            command.extend(['--chapter-language', self.chapter_language])
-        if self.chapters_file is not None:
-            command.extend(['--chapters', self.chapters_file])
+        if self._chapter_language is not None:
+            command.extend(['--chapter-language', self._chapter_language])
+        if self._chapters_file is not None:
+            command.extend(['--chapters', self._chapters_file])
 
         # split options
         command.extend(self._split_options)
@@ -192,11 +201,8 @@ class MKVFile:
         file_path = expanduser(file_path)
         if not isfile(file_path):
             raise FileNotFoundError('"{}" does not exist'.format(file_path))
-        self.chapters_file = file_path
-        if language is not None and language not in LANGUAGES:
-            raise ValueError('not an ISO639-2 language code')
-        elif language is not None and language in LANGUAGES:
-                self.chapter_language = language
+        self._chapters_file = file_path
+        self.chapter_language = language
 
     def exclude_internal_chapters(self):
         """Ignore the internal subtitles of the MKVFile"""
