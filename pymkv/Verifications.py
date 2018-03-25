@@ -91,3 +91,5 @@ def verify_supported(file_path, mkvmerge_path='mkvmerge'):
     except sp.CalledProcessError:
         raise ValueError('"{}" could not be opened')
     return info_json['container']['supported']
+
+# TODO: verify existing file of any type
