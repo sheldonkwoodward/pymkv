@@ -32,6 +32,10 @@ class MKVTrack:
         forced_track (bool, optional):
             Determines if the track should be a forced track when muxed into an MKV file.
         """
+        # track info
+        self._track_codec = None
+        self._track_type = None
+
         # base
         self.mkvmerge_path = 'mkvmerge'
         self._file_path = None
@@ -52,10 +56,6 @@ class MKVTrack:
         self.no_global_tags = False
         self.no_track_tags = False
         self.no_attachments = False
-
-        # track info
-        self._track_codec = None
-        self._track_type = None
 
     @property
     def file_path(self):
