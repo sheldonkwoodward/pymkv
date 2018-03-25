@@ -46,7 +46,10 @@ class MKVTrack:
         self.language = language
         self.default_track = default_track
         self.forced_track = forced_track
-        self.exclude_chapters = False
+        self.chapters = True
+        self.global_tags = True
+        self.track_tags = True
+        self.attachments = True
 
     @property
     def file_path(self):

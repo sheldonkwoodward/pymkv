@@ -122,9 +122,15 @@ class MKVFile:
             else:
                 command.extend(['-s', str(track.track_id)])
 
-            # exclude chapters
-            if track.exclude_chapters:
+            # exclusions
+            if not track.chapters:
                 command.append('--no-chapters')
+            if not track.global_tags:
+                command.append('--no-global-tags')
+            if not track.track_tags:
+                command.append('--no-track-tags')
+            if not track.attachments:
+                command.append('--no-attachments')
 
             # add path
             command.append(track.file_path)
@@ -171,19 +177,6 @@ class MKVFile:
             print('Running with command:\n"' + command + '"')
             sp.run(self.command(output_path, subprocess=True))
 
-    def add_track(self, track):
-        """Add an MKVTrack to the MKVFile.
-
-        track (str, MKVTrack):
-            The MKVTrack to be added the MKVFile.
-        """
-        if isinstance(track, str):
-            self.tracks.append(MKVTrack(track))
-        elif isinstance(track, MKVTrack):
-            self.tracks.append(track)
-        else:
-            raise TypeError('track is not str or MKVTrack')
-
     def add_file(self, file):
         """Combine an MKVFile with another MKVFile.
 
@@ -197,26 +190,18 @@ class MKVFile:
         else:
             raise TypeError('track is not str or MKVFile')
 
-    def add_chapters(self, file_path, language=None):
-        """Add a chapters file to an MKVFile.
+    def add_track(self, track):
+        """Add an MKVTrack to the MKVFile.
 
-        file_path (str):
-            The chapters file to be added to the MKVFile.
-        language (str, optional):
-            Must be an ISO639-2 language code. Only works if no existing language information exists in chapters.
+        track (str, MKVTrack):
+            The MKVTrack to be added the MKVFile.
         """
-        if not isinstance(file_path, str):
-            raise TypeError('"{}" is not of type str'.format(file_path))
-        file_path = expanduser(file_path)
-        if not isfile(file_path):
-            raise FileNotFoundError('"{}" does not exist'.format(file_path))
-        self._chapters_file = file_path
-        self.chapter_language = language
-
-    def exclude_internal_chapters(self):
-        """Ignore the internal subtitles of the MKVFile"""
-        for track in self.tracks:
-            track.exclude_chapters = True
+        if isinstance(track, str):
+            self.tracks.append(MKVTrack(track))
+        elif isinstance(track, MKVTrack):
+            self.tracks.append(track)
+        else:
+            raise TypeError('track is not str or MKVTrack')
 
     def get_track(self, track_num=None):
         """Get a track from the MKVFile.
@@ -512,11 +497,6 @@ class MKVFile:
         if link:
             self._split_options += '--link'
 
-    def link_to_none(self):
-        """Remove all linking to previous and next options."""
-        self._link_to_previous_file = None
-        self._link_to_next_file = None
-
     def link_to_previous(self, file_path):
         """Link the output file as the predecessor of the file_path file.
 
@@ -545,6 +525,27 @@ class MKVFile:
             raise ValueError('"{}" is not a matroska file'.format(file_path))
         self._link_to_next_file = file_path
 
+    def link_to_none(self):
+        """Remove all linking to previous and next options."""
+        self._link_to_previous_file = None
+        self._link_to_next_file = None
+
+    def chapters(self, file_path, language=None):
+        """Add a chapters file to an MKVFile.
+
+        file_path (str):
+            The chapters file to be added to the MKVFile.
+        language (str, optional):
+            Must be an ISO639-2 language code. Only works if no existing language information exists in chapters.
+        """
+        if not isinstance(file_path, str):
+            raise TypeError('"{}" is not of type str'.format(file_path))
+        file_path = expanduser(file_path)
+        if not isfile(file_path):
+            raise FileNotFoundError('"{}" does not exist'.format(file_path))
+        self._chapters_file = file_path
+        self.chapter_language = language
+
     def global_tags(self, file_path):
         """Add a global tags to an MKVFile.
 
@@ -557,6 +558,26 @@ class MKVFile:
         if not isfile(file_path):
             raise FileNotFoundError('"{}" does not exist'.format(file_path))
         self._global_tags_file = file_path
+
+    def no_chapters(self):
+        """Ignore the existing chapters of the MKVFile."""
+        for track in self.tracks:
+            track.chapters = False
+
+    def no_global_tags(self):
+        """Ignore the existing global tags of the MKVFile."""
+        for track in self.tracks:
+            track.global_tags = False
+
+    def no_track_tags(self):
+        """Ignore the existing track tags of the MKVFile."""
+        for track in self.tracks:
+            track.track_tags = False
+
+    def no_attachments(self):
+        """Ignore the existing attachments of the MKVFile."""
+        for track in self.tracks:
+            track.attachments = False
 
     @staticmethod
     def flatten(item):
