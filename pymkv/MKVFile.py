@@ -40,6 +40,9 @@ class MKVFile:
         self.title = title
         self._chapters_file = None
         self._chapter_language = None
+        self._global_tags_file = None
+        self._link_to_previous_file = None
+        self._link_to_next_file = None
         self.tracks = []
         if file_path is not None and not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
             raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change the mkvmerge_path '
@@ -64,10 +67,8 @@ class MKVFile:
                     new_track.forced_track = track['properties']['forced_track']
                 self.add_track(new_track)
 
-        # additional options
+        # split options
         self._split_options = []
-        self._link_to_previous_options = []
-        self._link_to_next_options = []
 
     @property
     def chapter_language(self):
@@ -134,10 +135,18 @@ class MKVFile:
         if self._chapters_file is not None:
             command.extend(['--chapters', self._chapters_file])
 
+        # global tags
+        if self._global_tags_file is not None:
+            command.extend(['--global-tags', self._global_tags_file])
+
+        # linking
+        if self._link_to_previous_file is not None:
+            command.extend(['--link-to-previous', '=' + self._link_to_previous_file])
+        if self._link_to_next_file is not None:
+            command.extend(['--link-to-next', '=' + self._link_to_next_file])
+
         # split options
         command.extend(self._split_options)
-        command.extend(self._link_to_previous_options)
-        command.extend(self._link_to_next_options)
 
         if subprocess:
             return command
@@ -191,7 +200,7 @@ class MKVFile:
     def add_chapters(self, file_path, language=None):
         """Add a chapters file to an MKVFile.
 
-        chapters (str):
+        file_path (str):
             The chapters file to be added to the MKVFile.
         language (str, optional):
             Must be an ISO639-2 language code. Only works if no existing language information exists in chapters.
@@ -505,8 +514,8 @@ class MKVFile:
 
     def link_to_none(self):
         """Remove all linking to previous and next options."""
-        self._link_to_previous_options = []
-        self._link_to_next_options = []
+        self._link_to_previous_file = None
+        self._link_to_next_file = None
 
     def link_to_previous(self, file_path):
         """Link the output file as the predecessor of the file_path file.
@@ -520,7 +529,7 @@ class MKVFile:
         file_path = expanduser(file_path)
         if not verify_matroska(file_path):
             raise ValueError('"{}" is not a matroska file'.format(file_path))
-        self._link_to_previous_options = ['--link-to-previous', '=' + file_path]
+        self._link_to_previous_file = file_path
 
     def link_to_next(self, file_path):
         """Link the output file as the successor of the file_path file.
@@ -534,7 +543,20 @@ class MKVFile:
         file_path = expanduser(file_path)
         if not verify_matroska(file_path):
             raise ValueError('"{}" is not a matroska file'.format(file_path))
-        self._link_to_next_options = ['--link-to-next', '=' + file_path]
+        self._link_to_next_file = file_path
+
+    def global_tags(self, file_path):
+        """Add a global tags to an MKVFile.
+
+        file_path (str):
+            The tags file to be added to the MKVFile.
+        """
+        if not isinstance(file_path, str):
+            raise TypeError('"{}" is not of type str'.format(file_path))
+        file_path = expanduser(file_path)
+        if not isfile(file_path):
+            raise FileNotFoundError('"{}" does not exist'.format(file_path))
+        self._global_tags_file = file_path
 
     @staticmethod
     def flatten(item):
