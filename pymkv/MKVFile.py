@@ -561,6 +561,28 @@ class MKVFile:
             raise FileNotFoundError('"{}" does not exist'.format(file_path))
         self._global_tags_file = file_path
 
+    def track_tags(self, *track_ids, exclusive=False):
+        """Include or exclude tags from specific tracks.
+
+        *track_ids (int, list, tuple):
+            Track ids to have tags included or excluded from.
+        exclusive:
+            Determines if the track_ids or the unspecified track_ids should have their tags kept. False by default
+            and will remove tags from unspecified tracks.
+        """
+        # check if in track_ids form
+        ids_flat = MKVFile.flatten(track_ids)
+        if len(track_ids) == 0:
+            raise ValueError('"{}" are not properly formatted track ids'.format(track_ids))
+        for tid in ids_flat:
+            if not isinstance(tid, int):
+                raise TypeError('track id "{}" not an int'.format(tid))
+            if tid < 0 or tid >= len(self.tracks):
+                raise IndexError('track id out of range')
+        # set no_track_tags
+        for tid in ids_flat if exclusive else list(set(range(len(self.tracks))) - set(ids_flat)):
+            self.tracks[tid].no_track_tags = True
+
     def no_chapters(self):
         """Ignore the existing chapters of the MKVFile."""
         for track in self.tracks:
