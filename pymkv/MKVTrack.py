@@ -4,7 +4,7 @@
 """MKVTrack Class"""
 
 import json
-from os.path import expanduser
+from os.path import expanduser, isfile
 import subprocess as sp
 
 from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
@@ -32,24 +32,30 @@ class MKVTrack:
         forced_track (bool, optional):
             Determines if the track should be a forced track when muxed into an MKV file.
         """
+        # base
         self.mkvmerge_path = 'mkvmerge'
-        self._track_codec = None
-        self._track_type = None
-
         self._file_path = None
         self.file_path = file_path
         self._track_id = None
         self.track_id = track_id
 
+        # flags
         self.track_name = track_name
         self._language = None
         self.language = language
+        self._tags = None
         self.default_track = default_track
         self.forced_track = forced_track
-        self.chapters = True
-        self.global_tags = True
-        self.track_tags = True
-        self.attachments = True
+
+        # exclusions
+        self.no_chapters = False
+        self.no_global_tags = False
+        self.no_track_tags = False
+        self.no_attachments = False
+
+        # track info
+        self._track_codec = None
+        self._track_type = None
 
     @property
     def file_path(self):
@@ -77,14 +83,6 @@ class MKVTrack:
         self._track_type = info_json['tracks'][track_id]['type']
 
     @property
-    def track_codec(self):
-        return self._track_codec
-
-    @property
-    def track_type(self):
-        return self._track_type
-
-    @property
     def language(self):
         return self._language
 
@@ -94,3 +92,25 @@ class MKVTrack:
             self._language = language
         else:
             raise ValueError('not an ISO639-2 language code')
+
+    @property
+    def tags(self):
+        return self._tags
+
+    @tags.setter
+    def tags(self, file_path):
+        if not isinstance(file_path, str):
+            raise TypeError('"{}" is not of type str'.format(file_path))
+        file_path = expanduser(file_path)
+        if not isfile(file_path):
+            raise FileNotFoundError('"{}" does not exist'.format(file_path))
+        self._tags = file_path
+
+    @property
+    def track_codec(self):
+        return self._track_codec
+
+    @property
+    def track_type(self):
+        return self._track_type
+

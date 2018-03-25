@@ -103,6 +103,8 @@ class MKVFile:
                 command.extend(['--track-name', str(track.track_id) + ':' + track.track_name])
             if track.language is not None:
                 command.extend(['--language', str(track.track_id) + ':' + track.language])
+            if track.tags is not None:
+                command.extend(['--tags', str(track.track_id) + ':' + track.tags])
             if not track.default_track:
                 command.extend(['--default-track', str(track.track_id) + ':0'])
             if track.forced_track:
@@ -123,13 +125,13 @@ class MKVFile:
                 command.extend(['-s', str(track.track_id)])
 
             # exclusions
-            if not track.chapters:
+            if track.no_chapters:
                 command.append('--no-chapters')
-            if not track.global_tags:
+            if track.no_global_tags:
                 command.append('--no-global-tags')
-            if not track.track_tags:
+            if track.no_track_tags:
                 command.append('--no-track-tags')
-            if not track.attachments:
+            if track.no_attachments:
                 command.append('--no-attachments')
 
             # add path
@@ -562,22 +564,22 @@ class MKVFile:
     def no_chapters(self):
         """Ignore the existing chapters of the MKVFile."""
         for track in self.tracks:
-            track.chapters = False
+            track.no_chapters = True
 
     def no_global_tags(self):
         """Ignore the existing global tags of the MKVFile."""
         for track in self.tracks:
-            track.global_tags = False
+            track.no_global_tags = True
 
     def no_track_tags(self):
         """Ignore the existing track tags of the MKVFile."""
         for track in self.tracks:
-            track.track_tags = False
+            track.no_track_tags = True
 
     def no_attachments(self):
         """Ignore the existing attachments of the MKVFile."""
         for track in self.tracks:
-            track.attachments = False
+            track.no_attachments = True
 
     @staticmethod
     def flatten(item):
