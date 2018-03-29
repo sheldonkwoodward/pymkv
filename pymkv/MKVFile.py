@@ -11,6 +11,7 @@ import subprocess as sp
 import bitmath
 
 from pymkv.MKVTrack import MKVTrack
+from pymkv.MKVAttachment import MKVAttachment
 from pymkv.Timestamp import Timestamp
 from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
 from pymkv.Verifications import verify_matroska, verify_mkvmerge
@@ -30,7 +31,7 @@ class MKVFile:
         After an MKVFile has been created, an mkvmerge command can be generated using command() or the file can be
         muxed using mux().
 
-        path (str, optional):
+        file_path (str, optional):
             Path to a pre-existing MKV file. The file will be imported into the new MKVFile object.
         title (str, optional):
             The internal title given to the MKVFile. If no title is given, the title of the pre-existing file will
@@ -44,6 +45,7 @@ class MKVFile:
         self._link_to_previous_file = None
         self._link_to_next_file = None
         self.tracks = []
+        self.attachments = []
         if file_path is not None and not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
             raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change the mkvmerge_path '
                                     'property')
@@ -137,6 +139,19 @@ class MKVFile:
             # add path
             command.append(track.file_path)
 
+        # add attachments
+        for attachment in self.attachments:
+            # info
+            if attachment.name is not None:
+                command.extend(['--attachment-name', attachment.name])
+            if attachment.description is not None:
+                command.extend(['--attachment-description', attachment.description])
+            if attachment.mime_type is not None:
+                command.extend(['--attachment-mime-type', attachment.mime_type])
+
+            # add path
+            command.extend(['--attach-file', attachment.file_path])
+
         # chapters
         if self._chapter_language is not None:
             command.extend(['--chapter-language', self._chapter_language])
@@ -196,7 +211,7 @@ class MKVFile:
         """Add an MKVTrack to the MKVFile.
 
         track (str, MKVTrack):
-            The MKVTrack to be added the MKVFile.
+            The MKVTrack to be added to the MKVFile.
         """
         if isinstance(track, str):
             self.tracks.append(MKVTrack(track))
@@ -204,6 +219,19 @@ class MKVFile:
             self.tracks.append(track)
         else:
             raise TypeError('track is not str or MKVTrack')
+
+    def add_attachment(self, attachment):
+        """Add an attachment to the MKVFile.
+
+        attachment (str, MKVAttachment):
+            The MKVAttachment to be added to the MKVAttachment.
+        """
+        if isinstance(attachment, str):
+            self.attachments.append(MKVAttachment(attachment))
+        elif isinstance(attachment, MKVAttachment):
+            self.attachments.append(attachment)
+        else:
+            raise TypeError('attachment is not str of MKVAttachment')
 
     def get_track(self, track_num=None):
         """Get a track from the MKVFile.

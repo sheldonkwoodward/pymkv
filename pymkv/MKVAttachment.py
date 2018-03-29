@@ -1,13 +1,13 @@
 # sheldon woodward
 # 3/28/18
 
-"""Attachment Class"""
+"""MKVAttachment Class"""
 
 from os.path import expanduser, isfile
 from mimetypes import guess_type
 
 
-class Attachment:
+class MKVAttachment:
     def __init__(self, file_path, name=None, description=None):
         """A class that represents an MKV attachment.
 
@@ -33,7 +33,7 @@ class Attachment:
         file_path = expanduser(file_path)
         if not isfile(file_path):
             raise FileNotFoundError('"{}" does not exist'.format(file_path))
-        self._mime_type = guess_type(file_path)
+        self._mime_type = guess_type(file_path)[0]
         self.name = None
         self._file_path = file_path
 
