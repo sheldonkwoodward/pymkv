@@ -8,7 +8,7 @@ from mimetypes import guess_type
 
 
 class MKVAttachment:
-    def __init__(self, file_path, name=None, description=None):
+    def __init__(self, file_path, name=None, description=None, attach_once=False):
         """A class that represents an MKV attachment.
 
         file_path (str):
@@ -17,12 +17,16 @@ class MKVAttachment:
             The name of the attachment.
         description (str):
             The description of the attachment.
+        attach_once (bool):
+            Determines if the attachment should be added to all split files or only the first. Attach to all files is
+            default with the option as false.
         """
+        self.mime_type = None
         self._file_path = None
         self.file_path = file_path
-        self._mime_type = None
         self.name = name
         self.description = description
+        self.attach_once = attach_once
 
     @property
     def file_path(self):
@@ -33,10 +37,6 @@ class MKVAttachment:
         file_path = expanduser(file_path)
         if not isfile(file_path):
             raise FileNotFoundError('"{}" does not exist'.format(file_path))
-        self._mime_type = guess_type(file_path)[0]
+        self.mime_type = guess_type(file_path)[0]
         self.name = None
         self._file_path = file_path
-
-    @property
-    def mime_type(self):
-        return self._mime_type

@@ -150,7 +150,10 @@ class MKVFile:
                 command.extend(['--attachment-mime-type', attachment.mime_type])
 
             # add path
-            command.extend(['--attach-file', attachment.file_path])
+            if not attachment.attach_once:
+                command.extend(['--attach-file', attachment.file_path])
+            else:
+                command.extend(['--attach-file-once', attachment.file_path])
 
         # chapters
         if self._chapter_language is not None:
