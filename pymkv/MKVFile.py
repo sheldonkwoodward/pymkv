@@ -72,6 +72,9 @@ class MKVFile:
         # split options
         self._split_options = []
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
     @property
     def chapter_language(self):
         return self._chapter_language
