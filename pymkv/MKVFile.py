@@ -89,10 +89,6 @@ class MKVFile:
             The path to be used as the output file in the mkvmerge command.
         subprocess (bool):
             Will return the command as a list so it can be used easily with the subprocess module.
-
-        Returns:
-            Returns the command to create the specified MKV file. Return type is str by default. Will return as list if
-            subprocess is true.
         """
         output_path = expanduser(output_path)
         command = [self.mkvmerge_path, '-o', output_path]
@@ -239,7 +235,7 @@ class MKVFile:
     def get_track(self, track_num=None):
         """Get a track from the MKVFile.
 
-        index (int):
+        track_num (int):
             Index of track to retrieve. Will return list if argument is not provided.
         """
         if track_num is None:
@@ -352,6 +348,8 @@ class MKVFile:
         duration (str, int):
             The duration of each split file. Takes either a str formatted to HH:MM:SS.nnnnnnnnn or an integer
             representing the number of seconds. The duration string requires formatting of at least M:S.
+        link (bool):
+            Determines if the split files should be linked together after splitting.
         """
         self._split_options = ['--split', 'duration:' + str(Timestamp(duration))]
         if link:
@@ -364,6 +362,8 @@ class MKVFile:
             The timestamps to split the file by. Can be passed as any combination of strs and ints, inside or outside
             an Iterable object. Any lists will be flattened. Timestamps must be ints, representing seconds, or strs in
             the form HH:MM:SS.nnnnnnnnn. The timestamp string requires formatting of at least M:S.
+        link (bool):
+            Determines if the split files should be linked together after splitting.
         """
         # check if in timestamps form
         ts_flat = MKVFile.flatten(timestamps)
@@ -389,6 +389,8 @@ class MKVFile:
         *frames (int, list, tuple):
             The frames to split the file by. Can be passed as any combination of ints, inside or outside an Iterable
             object. Any lists will be flattened. Frames must be ints.
+        link (bool):
+            Determines if the split files should be linked together after splitting.
         """
         # check if in frames form
         f_flat = MKVFile.flatten(frames)
@@ -416,6 +418,8 @@ class MKVFile:
             An Iterable of timestamp sets. Each timestamp set should be an Iterable of an even number of timestamps
             or any number of timestamp pairs. The very first and last timestamps are permitted to be None. Timestamp
             sets containing 4 or more timestamps will output as one file containing the parts specified.
+        link (bool):
+            Determines if the split files should be linked together after splitting.
         """
         # check if in parts form
         ts_flat = MKVFile.flatten(timestamp_parts)
@@ -460,6 +464,8 @@ class MKVFile:
             An Iterable of frame sets. Each frame set should be an Iterable of an even number of frames or any
             number of frame pairs. The very first and last frames are permitted to be None. Frame sets containing 4
             or more frames will output as one file containing the parts specified.
+        link (bool):
+            Determines if the split files should be linked together after splitting.
         """
         # check if in parts form
         f_flat = MKVFile.flatten(frame_parts)
@@ -507,6 +513,8 @@ class MKVFile:
        *chapters (int, list, tuple):
            The chapters to split the file by. Can be passed as any combination of ints, inside or outside an
            Iterable object. Any lists will be flattened. Chapters must be ints.
+        link (bool):
+            Determines if the split files should be linked together after splitting.
        """
         # check if in chapters form
         c_flat = MKVFile.flatten(chapters)
