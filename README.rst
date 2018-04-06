@@ -37,7 +37,7 @@ or clone the repo and run the following command if you wish to edit the source c
 Documentation
 -------------
 
-pymkv documentation can be found in the `GitHub repo wiki <../wiki>`__.
+pymkv documentation can be found in the `GitHub repo wiki <https://github.com/sheldonkwoodward/pymkv/wiki>`__.
 
 .. |PyPI Version| image::  https://img.shields.io/pypi/sheldonkwoodward/pymkv.svg
     :target: https://pypi.python.org/pypi/pymkv/
