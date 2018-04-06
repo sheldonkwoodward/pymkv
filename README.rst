@@ -28,7 +28,7 @@ To install pymkv using pip, run the following command:
 
     $ pip install pymkv
 
-or clone the repo and run the following command if you wish to edit the source code:
+You can also clone the repo and run the following command in project root if you wish to edit the source code:
 
 ::
 
