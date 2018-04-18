@@ -13,16 +13,17 @@ from pymkv.Verifications import verify_supported
 
 class MKVTrack:
     def __init__(self, file_path, track_id=0, track_name=None, language=None, default_track=False, forced_track=False):
-        """An class that represents an MKV track such as video, audio, or subtitles.
+        """A class that represents an MKV track such as video, audio, or subtitles.
 
         MKVTracks can be added to an MKVFile. MKVTracks can be video, audio, or subtitle tracks. The only required
         argument is path which gives the path to a track file.
 
         file_path (str):
-            Path to the track file.
-        track_id (int):
+            Path to the track file. This can also be an MKV where the *track_id* is the track represented in the MKV.
+            This is the only required argument.
+        track_id (int, optional):
             The id of the track to be used in the file. Does not need to be set unless the input file has multiple
-            track.
+            tracks.
         track_name (str, optional):
             The name that will be given to the track when muxed into a file.
         language (str, optional):
