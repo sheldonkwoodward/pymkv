@@ -105,6 +105,9 @@ class MKVFile:
                 command.extend(['--tags', str(track.track_id) + ':' + track.tags])
             if not track.default_track:
                 command.extend(['--default-track', str(track.track_id) + ':0'])
+            # Add default tracks when present    
+            if track.default_track:
+                command.extend(['--default-track', str(track.track_id) + ':1'])
             if track.forced_track:
                 command.extend(['--forced-track', str(track.track_id) + ':1'])
 
