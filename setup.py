@@ -5,7 +5,6 @@
 
 from os.path import abspath, dirname, join
 from setuptools import setup
-from pip.req import parse_requirements
 
 from pymkv import __version__
 
