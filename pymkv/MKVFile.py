@@ -106,10 +106,14 @@ class MKVFile:
                 command.extend(['--language', str(track.track_id) + ':' + track.language])
             if track.tags is not None:
                 command.extend(['--tags', str(track.track_id) + ':' + track.tags])
-            if not track.default_track:
+            if track.default_track:
+                command.extend(['--default-track', str(track.track_id) + ':1'])
+            else:
                 command.extend(['--default-track', str(track.track_id) + ':0'])
             if track.forced_track:
                 command.extend(['--forced-track', str(track.track_id) + ':1'])
+            else:
+                command.extend(['--forced-track', str(track.track_id) + ':0'])
 
             # remove extra tracks
             if track.track_type != 'video':
