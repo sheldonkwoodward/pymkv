@@ -6,8 +6,6 @@
 from os.path import abspath, dirname, join
 from setuptools import setup
 
-from pymkv import __version__
-
 
 this_dir = abspath(dirname(__file__))
 with open(join(this_dir, 'README.rst'), encoding='utf-8') as file:
@@ -18,7 +16,7 @@ install_requires = [r.rstrip('\n') for r in open('requirements.txt').readlines()
 
 setup(
     name='pymkv',
-    version=__version__,
+    version='1.0.4',
     description='A Python wrapper for mkvmerge. It provides support for muxing tracks together, combining multiple '
                 'MKV files, reordering tracks, naming tracks, and other MKV related things.',
     long_description=long_description,
