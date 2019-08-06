@@ -17,7 +17,7 @@ install_requires = [r.rstrip('\n') for r in open('requirements.txt').readlines()
 setup(
     name='pymkv',
     description='A Python wrapper for mkvmerge. It provides support for muxing, splitting, linking, chapters, tags, '
-                'and attachments through the use of mkvmerge.'
+                'and attachments through the use of mkvmerge.',
     long_description=long_description,
     url='https://github.com/sheldonkwoodward/pymkv',
     author='Sheldon Woodward',
