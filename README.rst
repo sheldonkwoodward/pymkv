@@ -33,7 +33,7 @@ You can also clone the repo and run the following command in the project root to
     $ pip install -e .
 
 Documentation
-------------
+-------------
 The documentation for pymkv can be found in the `GitHub repo wiki <https://github.com/sheldonkwoodward/pymkv/wiki>`__.
 
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/pymkv.svg
