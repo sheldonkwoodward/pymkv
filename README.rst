@@ -16,7 +16,7 @@ is greatly appreciated!
 
 Installation
 ------------
-mkvmerge must be installed on your computer. It is recommended to add it to your `$PATH` variable but a
+mkvmerge must be installed on your computer. It is recommended to add it to your $PATH variable but a
 different path can be manually specified. mkvmerge can be found and downloaded from
 `here <https://mkvtoolnix.download/downloads.html>`__ or in most package managers.
 
