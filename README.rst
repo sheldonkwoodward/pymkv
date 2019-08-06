@@ -4,8 +4,8 @@ pymkv
 |License|
 |Codacy Badge|
 
-pymkv is a Python wrapper for mkvmerge. It provides support for muxing, splitting, linking, chapters, tags, and
-and attachments through the use of mkvmerge.
+pymkv is a Python wrapper for mkvmerge. It provides support for muxing, splitting, linking, chapters, tags, and 
+attachments through the use of mkvmerge.
 
 About pymkv
 -----------
