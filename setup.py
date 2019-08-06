@@ -21,7 +21,7 @@ setup(
     long_description=long_description,
     url='https://github.com/sheldonkwoodward/pymkv',
     author='Sheldon Woodward',
-    author_email='admin@sheldonw.com',
+    author_email='me@sheldonw.com',
     license='MIT',
     packages=['pymkv'],
     classifiers=[
