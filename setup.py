@@ -16,24 +16,28 @@ install_requires = [r.rstrip('\n') for r in open('requirements.txt').readlines()
 
 setup(
     name='pymkv',
-    version='1.0.4',
-    description='A Python wrapper for mkvmerge. It provides support for muxing tracks together, combining multiple '
-                'MKV files, reordering tracks, naming tracks, and other MKV related things.',
+    description='A Python wrapper for mkvmerge. It provides support for muxing, splitting, linking, chapters, tags, '
+                'and attachments through the use of mkvmerge.'
     long_description=long_description,
     url='https://github.com/sheldonkwoodward/pymkv',
     author='Sheldon Woodward',
-    author_email='admin@sheldonw.com',
+    author_email='me@sheldonw.com',
     license='MIT',
     packages=['pymkv'],
     classifiers=[
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'Topic :: Utilities',
-        'License :: Public Domain',
+        'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Topic :: Multimedia :: Video :: Conversion',
+        'Topic :: Utilities',
     ],
     keywords='wrapper',
     python_requires='>=3.6',
-    install_requires=install_requires
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
+    install_requires=install_requires,
 )
