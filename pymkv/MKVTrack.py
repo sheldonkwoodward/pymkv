@@ -7,8 +7,8 @@ import json
 from os.path import expanduser, isfile
 import subprocess as sp
 
-from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
 from pymkv.Verifications import verify_supported
+from pymkv.ISO639_2 import is_ISO639_2
 
 
 class MKVTrack:
@@ -92,7 +92,7 @@ class MKVTrack:
 
     @language.setter
     def language(self, language):
-        if language in LANGUAGES or language is None:
+        if language is None or is_ISO639_2(language):
             self._language = language
         else:
             raise ValueError('not an ISO639-2 language code')

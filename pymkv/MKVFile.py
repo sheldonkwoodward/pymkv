@@ -13,7 +13,7 @@ import bitmath
 from pymkv.MKVTrack import MKVTrack
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.Timestamp import Timestamp
-from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
+from pymkv.ISO639_2 import is_ISO639_2
 from pymkv.Verifications import verify_matroska, verify_mkvmerge
 
 
@@ -81,7 +81,7 @@ class MKVFile:
 
     @chapter_language.setter
     def chapter_language(self, language):
-        if language is not None and language not in LANGUAGES:
+        if language is not None and not is_ISO639_2(language):
             raise ValueError('not an ISO639-2 language code')
         self._chapter_language = language
 
