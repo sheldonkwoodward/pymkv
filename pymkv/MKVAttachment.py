@@ -28,6 +28,9 @@ class MKVAttachment:
         self.description = description
         self.attach_once = attach_once
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
     @property
     def file_path(self):
         return self._file_path

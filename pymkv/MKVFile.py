@@ -13,7 +13,7 @@ import bitmath
 from pymkv.MKVTrack import MKVTrack
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.Timestamp import Timestamp
-from pymkv.ISO639_2 import ISO639_2 as LANGUAGES
+from pymkv.ISO639_2 import is_ISO639_2
 from pymkv.Verifications import verify_matroska, verify_mkvmerge
 
 
@@ -72,13 +72,16 @@ class MKVFile:
         # split options
         self._split_options = []
 
+    def __repr__(self):
+        return repr(self.__dict__)
+
     @property
     def chapter_language(self):
         return self._chapter_language
 
     @chapter_language.setter
     def chapter_language(self, language):
-        if language is not None and language not in LANGUAGES:
+        if language is not None and not is_ISO639_2(language):
             raise ValueError('not an ISO639-2 language code')
         self._chapter_language = language
 
@@ -103,10 +106,14 @@ class MKVFile:
                 command.extend(['--language', str(track.track_id) + ':' + track.language])
             if track.tags is not None:
                 command.extend(['--tags', str(track.track_id) + ':' + track.tags])
-            if not track.default_track:
+            if track.default_track:
+                command.extend(['--default-track', str(track.track_id) + ':1'])
+            else:
                 command.extend(['--default-track', str(track.track_id) + ':0'])
             if track.forced_track:
                 command.extend(['--forced-track', str(track.track_id) + ':1'])
+            else:
+                command.extend(['--forced-track', str(track.track_id) + ':0'])
 
             # remove extra tracks
             if track.track_type != 'video':
