@@ -256,7 +256,7 @@ class MKVFile:
             The track number of the track to move to the front.
         """
         if 0 <= track_num < len(self.tracks):
-            self.tracks.insert(0, self.tracks.pop(self.tracks[track_num]))
+            self.tracks.insert(0, self.tracks.pop(track_num))
         else:
             raise IndexError('track index out of range')
 
@@ -267,7 +267,7 @@ class MKVFile:
             The track number of the track to move to the back.
         """
         if 0 <= track_num < len(self.tracks):
-            self.tracks.append(self.tracks.pop(self.tracks[track_num]))
+            self.tracks.append(self.tracks.pop(track_num))
         else:
             raise IndexError('track index out of range')
 
