@@ -5,7 +5,7 @@
 
 import json
 from os import devnull
-from os.path import expanduser, isfile
+from os.path import expanduser, isfile, join, basename, splitext
 import subprocess as sp
 
 import bitmath
@@ -38,6 +38,7 @@ class MKVFile:
             be used if it exists.
         """
         self.mkvmerge_path = 'mkvmerge'
+        self.mkvextract_path = 'mkvextract'
         self.title = title
         self._chapters_file = None
         self._chapter_language = None
@@ -68,6 +69,19 @@ class MKVFile:
                 if 'forced_track' in track['properties']:
                     new_track.forced_track = track['properties']['forced_track']
                 self.add_track(new_track)
+
+            # add attachment with info
+            for attachment in info_json['attachments']:
+                new_attachment = MKVAttachment(file_path,
+                                               name=attachment['file_name'],
+                                               description=attachment['description'])
+                if 'id' in attachment:
+                    new_attachment.id = attachment['id']
+                if 'size' in attachment:
+                    new_attachment.size = attachment['size']
+                if 'properties' in attachment and 'uid' in attachment['properties']:
+                    new_attachment.uid = attachment['properties']['uid']
+                self.add_attachment(new_attachment)
 
         # split options
         self._split_options = []
@@ -663,3 +677,38 @@ class MKVFile:
             return flat_list
         else:
             return [item]
+
+    def extract_video_tracks(self, out_folder=''):
+        '''
+        .Extract tracks
+        '''
+        names = []
+        name_args = []
+        for track in self.tracks:
+            if track._track_type == 'video':
+                bname = splitext(basename(track.file_path))[0]
+                name = '{}.mp4'.format(join(out_folder, bname + "_" + track.track_name))
+                name_args.append('{}:{}'.format(track._track_id, name))
+                names.append(name)
+                file_path = track._file_path
+
+        sp.run([self.mkvextract_path, 'tracks', file_path] + name_args,
+               stdout=open(devnull, 'wb'))
+        return names
+
+    def extract_attachments(self, out_folder=''):
+        '''
+        .Extract attachments
+        '''
+        names = []
+        name_args = []
+        for attachment in self.attachments:
+            bname = splitext(basename(attachment.file_path))[0]
+            name = join(out_folder, bname + "_" + attachment.name)
+            name_args.append('{}:{}'.format(attachment.id, name))
+            names.append(name)
+            file_path = attachment._file_path
+
+        sp.run([self.mkvextract_path, 'attachments', file_path] + name_args,
+               stdout=open(devnull, 'wb'))
+        return names
