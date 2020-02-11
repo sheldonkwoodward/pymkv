@@ -679,9 +679,7 @@ class MKVFile:
             return [item]
 
     def extract_video_tracks(self, out_folder=''):
-        '''
-        .Extract tracks
-        '''
+        """Extract video tracks."""
         names = []
         name_args = []
         for track in self.tracks:
@@ -697,9 +695,7 @@ class MKVFile:
         return names
 
     def extract_attachments(self, out_folder=''):
-        '''
-        .Extract attachments
-        '''
+        """Extract attachments."""
         names = []
         name_args = []
         for attachment in self.attachments:
