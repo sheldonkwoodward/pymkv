@@ -1,0 +1,52 @@
+name: Build and publish pdoc documentation
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build-n-publish:
+    name: Build and publish pdoc documentation
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install and upgrade build tool packages
+        run: |
+          pip install --upgrade setuptools twine wheel
+      - name: Install pdoc
+        run: |
+          pip install --upgrade pdoc
+      - name: Checkout master
+        uses: actions/checkout@v2
+        with:
+          path: pymkv
+      - name: Install pymkv
+        run: |
+          pip install pymkv
+      - name: Build docs
+        run: |
+          pdoc --html pymkv --html-dir ../docs --overwrite
+        working-directory: ./pymkv
+      - name: Checkout gh-pages
+        run: |
+          git fetch
+          git checkout gh-pages
+        working-directory: ./pymkv
+      - name: Copy doc files
+        run: |
+          cp docs/pymkv/* pymkv
+      - name: Commit doc files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "Docs update."
+        working-directory: ./pymkv
+      - name: Push doc changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          directory: pymkv
