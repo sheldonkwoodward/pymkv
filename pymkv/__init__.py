@@ -3,11 +3,12 @@
 
 from pkg_resources import get_distribution, DistributionNotFound
 
-from .MKVAttachment import *
-from .MKVTrack import *
-from .MKVFile import *
-from .Timestamp import *
-from .Verifications import *
+# package imports
+from .MKVAttachment import MKVAttachment
+from .MKVTrack import MKVTrack
+from .MKVFile import MKVFile
+from .Timestamp import Timestamp
+from .Verifications import verify_matroska, verify_mkvmerge, verify_recognized, verify_supported
 
 
 # set the version number within the package using setuptools-scm
