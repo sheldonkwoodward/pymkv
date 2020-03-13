@@ -20,4 +20,4 @@ You can also clone the repo and run the following command in the project root to
     $ pip install -e .
 
 ## Documentation
-The documentation for pymkv can be found in the [here](https://github.com/sheldonkwoodward/pymkv/wiki).
+The documentation for pymkv can be found in the [here](https://pymkv.shel.dev/).
