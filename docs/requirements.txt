@@ -1,0 +1,7 @@
+# project dependencies
+bitmath
+iso-639
+
+# doc dependencies
+Sphinx ~= 2.4
+sphinx_rtd_theme

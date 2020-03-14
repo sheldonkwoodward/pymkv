@@ -8,10 +8,17 @@ from setuptools import setup
 
 
 this_dir = abspath(dirname(__file__))
-with open(join(this_dir, 'README.rst'), encoding='utf-8') as file:
+with open(join(this_dir, 'README.md'), encoding='utf-8') as file:
     long_description = file.read()
 
-install_requires = [r.rstrip('\n') for r in open('requirements.txt').readlines()]
+setup_requires = [
+    'setuptools_scm'
+]
+
+install_requires = [
+    'bitmath',
+    'iso-639'
+]
 
 
 setup(
@@ -38,6 +45,6 @@ setup(
     keywords='wrapper',
     python_requires='>=3.6',
     use_scm_version=True,
-    setup_requires=['setuptools_scm'],
+    setup_requires=setup_requires,
     install_requires=install_requires,
 )
