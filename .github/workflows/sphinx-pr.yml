@@ -1,0 +1,19 @@
+name: "Pull Request Docs Check"
+on:
+  - pull_request
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the PR
+        uses: actions/checkout@v2
+      - name: Build Sphinx docs
+        uses: ammaraskar/sphinx-action@master
+        with:
+          docs-folder: "docs/"
+      - name: Upload HTML artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: DocumentationHTML
+          path: docs/build/html/
