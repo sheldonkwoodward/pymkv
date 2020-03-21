@@ -9,21 +9,21 @@ Create a new :class:`~pymkv.MKVTrack` from a track file. This example takes a st
 :class:`~pymkv.MKVTrack`.
 
 >>> from pymkv import MKVTrack
->>> track1 = MKVTrack('path/to/track.h264')  # create track from file
->>> track1.track_name = 'Some Name'  # set track name
->>> track1.language = 'eng'  # set track language
+>>> track1 = MKVTrack('path/to/track.h264')
+>>> track1.track_name = 'Some Name'
+>>> track1.language = 'eng'
 
 Create a new :class:`~pymkv.MKVTrack` from an MKV file. This example will take a specific track from an MKV and also
 prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is muxed into an :class:`~pymkv.MKVFile`.
 
->>> track2 = MKVTrack('path/to/track.aac')  # create track from file
->>> track2.language = 'eng'  # add a language to the standalone track file
+>>> track2 = MKVTrack('path/to/track.aac')
+>>> track2.language = 'eng'
 
 Create a new :class:`~pymkv.MKVTrack` from an MKV file. This example will take a specific track from an MKV and also
 prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is muxed into an :class:`~pymkv.MKVFile`.
 
->>> track3 = MKVTrack('path/to/MKV.mkv', track_id=1)  # represents track 1 from the MKV
->>> track3.no_global_tags = True  # exclude global tags existing in the MKV from the new track
+>>> track3 = MKVTrack('path/to/MKV.mkv', track_id=1)
+>>> track3.no_global_tags = True
 
 Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed together.
 
@@ -133,6 +133,11 @@ class MKVTrack:
 
         Setting this property will verify the passed in file is supported by mkvmerge and set the track_id to 0. It
         is recommended to recreate MKVTracks instead of setting their file path after instantiation.
+
+        Raises
+        ------
+        ValueError
+            Raised if `file_path` is not a supported file type.
         """
         return self._file_path
 
@@ -219,5 +224,5 @@ class MKVTrack:
 
     @property
     def track_type(self):
-        """The type of track such as video or audio."""
+        """str: The type of track such as video or audio."""
         return self._track_type

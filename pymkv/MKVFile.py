@@ -125,7 +125,7 @@ class MKVFile:
         Raises
         ------
         ValueError
-            Raise if not a valid ISO 639-2 language code.
+            Raised if not a valid ISO 639-2 language code.
         """
         return self._chapter_language
 
