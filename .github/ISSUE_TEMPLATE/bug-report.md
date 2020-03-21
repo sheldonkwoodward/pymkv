@@ -11,7 +11,7 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **To Reproduce**
-Steps to reproduce the behavior:
+Steps to reproduce the behavior. Please link to relevant MKV or track files to reproduce the issue.
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
@@ -19,9 +19,9 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. macOS]
- - Version: [e.g. 10.14]
+**Software (please complete the following information):**
+ - OS: [e.g. macOS 10.14]
+ - MKVToolNix version [e.g. v44.0.0]
 
 **Additional context**
 Add any other context about the problem here.
