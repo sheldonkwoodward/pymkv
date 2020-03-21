@@ -20,7 +20,7 @@ To install pymkv from PyPI, use the following command:
 
     $ pip install pymkv
 
-You can also clone the repo and run the following command in the project root to edit the source code:
+You can also clone the repo and run the following command in the project root to install the source code as editable:
 
     $ pip install -e .
 
