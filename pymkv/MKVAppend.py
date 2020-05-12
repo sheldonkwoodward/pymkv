@@ -29,7 +29,7 @@ Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed
 
 >>> from pymkv import MKVFile
 >>> file = MKVFile()
->>> file.append_track(track1)
+>>> file.append_track(track1, root_track=True)
 >>> file.append_track(track2)
 >>> file.append_track(track3)
 >>> file.mux('path/to/output.mkv')
