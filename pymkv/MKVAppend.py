@@ -1,37 +1,37 @@
-""":class:`~pymkv.MKVTrack` classes are used to represent tracks within an MKV or to be used in an MKV. They can
+""":class:`~pymkv.MKVAppend` classes are used to represent tracks within an MKV or to be used in an MKV. They can
 represent a video, audio, or subtitle track.
 
 Examples
 --------
-Below are some basic examples of how the :class:`~pymkv.MKVTrack` objects can be used.
+Below are some basic examples of how the :class:`~pymkv.MKVAppend` objects can be used.
 
-Create a new :class:`~pymkv.MKVTrack` from a track file. This example takes a standalone track file and uses it in an
-:class:`~pymkv.MKVTrack`.
+Create a new :class:`~pymkv.MKVAppend` from a track file. This example takes a standalone track file and uses it in an
+:class:`~pymkv.MKVAppend`.
 
->>> from pymkv import MKVTrack
->>> track1 = MKVTrack('path/to/track.h264')
+>>> from pymkv import MKVAppend
+>>> track1 = MKVAppend('path/to/track.h264')
 >>> track1.track_name = 'Some Name'
 >>> track1.language = 'eng'
 
-Create a new :class:`~pymkv.MKVTrack` from an MKV file. This example will take a specific track from an MKV and also
-prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is muxed into an :class:`~pymkv.MKVFile`.
+Create a new :class:`~pymkv.MKVAppend` from an MKV file. This example will take a specific track from an MKV and also
+prevent any global tags from being included if the :class:`~pymkv.MKVAppend` is muxed into an :class:`~pymkv.MKVFile`.
 
->>> track2 = MKVTrack('path/to/track.aac')
+>>> track2 = MKVAppend('path/to/track.aac')
 >>> track2.language = 'eng'
 
-Create a new :class:`~pymkv.MKVTrack` from an MKV file. This example will take a specific track from an MKV and also
-prevent any global tags from being included if the :class:`~pymkv.MKVTrack` is muxed into an :class:`~pymkv.MKVFile`.
+Create a new :class:`~pymkv.MKVAppend` from an MKV file. This example will take a specific track from an MKV and also
+prevent any global tags from being included if the :class:`~pymkv.MKVAppend` is muxed into an :class:`~pymkv.MKVFile`.
 
->>> track3 = MKVTrack('path/to/MKV.mkv', track_id=1)
+>>> track3 = MKVAppend('path/to/MKV.mkv', track_id=1)
 >>> track3.no_global_tags = True
 
 Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed together.
 
 >>> from pymkv import MKVFile
 >>> file = MKVFile()
->>> file.add_track(track1)
->>> file.add_track(track2)
->>> file.add_track(track3)
+>>> file.append_track(track1)
+>>> file.append_track(track2)
+>>> file.append_track(track3)
 >>> file.mux('path/to/output.mkv')
 """
 
@@ -43,11 +43,11 @@ from pymkv.Verifications import verify_supported
 from pymkv.ISO639_2 import is_ISO639_2
 
 
-class MKVTrack:
+class MKVAppend:
     """A class that represents a track for an :class:`~pymkv.MKVFile` object.
 
-    :class:`~pymkv.MKVTrack` objects are video, audio, or subtitles. Tracks can be standalone files or a single track
-    within an MKV file, both can be handled by pymkv. An :class:`~pymkv.MKVTrack` object can be added to an
+    :class:`~pymkv.MKVAppend` objects are video, audio, or subtitles. Tracks can be standalone files or a single track
+    within an MKV file, both can be handled by pymkv. An :class:`~pymkv.MKVAppend` object can be added to an
     :class:`~pymkv.MKVFile` and will be included when the MKV is muxed.
 
     Parameters
@@ -81,32 +81,32 @@ class MKVTrack:
     forced_track : bool
         Determines if the track should be a forced track when muxed into an MKV file.
     no_chapters : bool
-        If chapters exist in the track file, don't include them when this :class:`~pymkv.MKVTrack` object is a track
+        If chapters exist in the track file, don't include them when this :class:`~pymkv.MKVAppend` object is a track
         in an :class:`~pymkv.MKVFile` mux operation. This option has no effect on standalone track files, only tracks
         that are already part of an MKV file.
     no_global_tags : bool
-        If global tags exist in the track file, don't include them when this :class:`~pymkv.MKVTrack` object is a track
+        If global tags exist in the track file, don't include them when this :class:`~pymkv.MKVAppend` object is a track
         in an :class:`~pymkv.MKVFile` mux operation. This option has no effect on standalone track files, only tracks
         that are already part of an MKV file.
     no_track_tags : bool
         If track tags exist in the specified track within the track file, don't include them when this
-        :class:`~pymkv.MKVTrack` object is a track in an :class:`~pymkv.MKVFile` mux operation. This option has no
+        :class:`~pymkv.MKVAppend` object is a track in an :class:`~pymkv.MKVFile` mux operation. This option has no
         effect on standalone track files, only tracks that are already part of an MKV file.
     no_attachments : bool
-        If attachments exist in the track file, don't include them when this :class:`~pymkv.MKVTrack` object is a track
+        If attachments exist in the track file, don't include them when this :class:`~pymkv.MKVAppend` object is a track
         in an :class:`~pymkv.MKVFile` mux operation. This option has no effect on standalone track files, only tracks
         that are already part of an MKV file.
     """
 
-    def __init__(self, file_path, track_id=0, track_name=None, language=None, default_track=False, forced_track=False):
+    def __init__(self, file_path, root_track=False, track_id=0, track_name=None, language=None, default_track=False, forced_track=False):
         # track info
         self._track_codec = None
         self._track_type = None
 
         # base
         self.mkvmerge_path = 'mkvmerge'
-        self.root_track  = False
-        self.append = False
+        self.root_track  = root_track
+        self.append = True
         self._file_path = None
         self.file_path = file_path
         self._track_id = None
@@ -134,7 +134,7 @@ class MKVTrack:
         """str: The path to the track or MKV file containing the desired track.
 
         Setting this property will verify the passed in file is supported by mkvmerge and set the track_id to 0. It
-        is recommended to recreate MKVTracks instead of setting their file path after instantiation.
+        is recommended to recreate MKVAppends instead of setting their file path after instantiation.
 
         Raises
         ------

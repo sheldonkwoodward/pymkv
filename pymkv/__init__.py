@@ -7,6 +7,7 @@ from pkg_resources import get_distribution, DistributionNotFound
 from .MKVAttachment import MKVAttachment
 from .MKVTrack import MKVTrack
 from .MKVFile import MKVFile
+from .MKVAppend import MKVAppend
 from .Timestamp import Timestamp
 from .Verifications import verify_matroska, verify_mkvmerge, verify_recognized, verify_supported
 
