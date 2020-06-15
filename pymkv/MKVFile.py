@@ -218,10 +218,10 @@ class MKVFile:
                 command.extend(['--attach-file-once', attachment.file_path])
 
         # chapters
+        if self._chapters_file is not None:
+            command.extend(['--chapter-charset UTF-8 --chapters', self._chapters_file])
         if self._chapter_language is not None:
             command.extend(['--chapter-language', self._chapter_language])
-        if self._chapters_file is not None:
-            command.extend(['--chapters', self._chapters_file])
 
         # global tags
         if self._global_tags_file is not None:
