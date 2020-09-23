@@ -260,11 +260,11 @@ class MKVFile:
                                     'property')
         output_path = expanduser(output_path)
         if silent:
-            sp.run(self.command(output_path, subprocess=True), stdout=open(devnull, 'wb'))
+            sp.run(self.command(output_path, subprocess=True), stdout=open(devnull, 'wb'), check=True)
         else:
             command = self.command(output_path)
             print('Running with command:\n"' + command + '"')
-            sp.run(self.command(output_path, subprocess=True))
+            sp.run(self.command(output_path, subprocess=True), check=True, capture_output=True)
 
     def add_file(self, file):
         """Add an MKV file into the :class:`~pymkv.MKVFile` object.
