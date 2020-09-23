@@ -38,6 +38,7 @@ Combine two MKVs. This example takes two existing MKVs and combines their tracks
 import json
 from os import devnull
 from os.path import expanduser, isfile
+from pathlib import Path
 import subprocess as sp
 
 import bitmath
@@ -260,11 +261,11 @@ class MKVFile:
                                     'property')
         output_path = expanduser(output_path)
         if silent:
-            sp.run(self.command(output_path, subprocess=True), stdout=open(devnull, 'wb'))
+            sp.run(self.command(output_path, subprocess=True), stdout=open(devnull, 'wb'), check=True)
         else:
             command = self.command(output_path)
             print('Running with command:\n"' + command + '"')
-            sp.run(self.command(output_path, subprocess=True))
+            sp.run(self.command(output_path, subprocess=True), check=True, capture_output=True)
 
     def add_file(self, file):
         """Add an MKV file into the :class:`~pymkv.MKVFile` object.
@@ -756,16 +757,18 @@ class MKVFile:
         Raises
         ------
         TypeError
-            Raised if `file_path` is not of type str.
+            Raised if `file_path` is not of type str or Path.
         ValueError
             Raised if file at `file_path` cannot be verified as an MKV.
         """
         # check if valid file
-        if not isinstance(str, file_path):
-            raise TypeError('"{}" is not of type str'.format(file_path))
+        if isinstance(file_path, Path):
+            file_path = Path(file_path)
+        elif not isinstance(file_path, str):
+            raise TypeError(f'"{file_path}" is not of type str or Path')
         file_path = expanduser(file_path)
         if not verify_matroska(file_path):
-            raise ValueError('"{}" is not a matroska file'.format(file_path))
+            raise ValueError(f'"{file_path}" is not a matroska file')
         self._link_to_previous_file = file_path
 
     def link_to_next(self, file_path):
@@ -779,16 +782,18 @@ class MKVFile:
         Raises
         ------
         TypeError
-            Raised if `file_path` is not of type str.
+            Raised if `file_path` is not of type str or Path.
         ValueError
             Raised if file at `file_path` cannot be verified as an MKV.
         """
         # check if valid file
-        if not isinstance(file_path, str):
-            raise TypeError('"{}" is not of type str'.format(file_path))
+        if isinstance(file_path, Path):
+            file_path = Path(file_path)
+        elif not isinstance(file_path, str):
+            raise TypeError(f'"{file_path}" is not of type str or Path')
         file_path = expanduser(file_path)
         if not verify_matroska(file_path):
-            raise ValueError('"{}" is not a matroska file'.format(file_path))
+            raise ValueError(f'"{file_path}" is not a matroska file')
         self._link_to_next_file = file_path
 
     def link_to_none(self):
@@ -811,13 +816,15 @@ class MKVFile:
         FileNotFoundError
             Raised if the file at `file_path` does not exist.
         TypeError
-            Raised if `file_path` is not of type str.
+            Raised if `file_path` is not of type str or Path.
         """
-        if not isinstance(file_path, str):
-            raise TypeError('"{}" is not of type str'.format(file_path))
+        if isinstance(file_path, Path):
+            file_path = Path(file_path)
+        elif not isinstance(file_path, str):
+            raise TypeError(f'"{file_path}" is not of type str or Path')
         file_path = expanduser(file_path)
         if not isfile(file_path):
-            raise FileNotFoundError('"{}" does not exist'.format(file_path))
+            raise FileNotFoundError(f'"{file_path}" does not exist')
         self._chapters_file = file_path
         self.chapter_language = language
 
@@ -834,13 +841,15 @@ class MKVFile:
         FileNotFoundError
             Raised if the file at `file_path` does not exist.
         TypeError
-            Raised if `file_path` is not of type str.
+            Raised if `file_path` is not of type str or Path.
         """
-        if not isinstance(file_path, str):
-            raise TypeError('"{}" is not of type str'.format(file_path))
+        if isinstance(file_path, Path):
+            file_path = Path(file_path)
+        elif not isinstance(file_path, str):
+            raise TypeError(f'"{file_path}" is not of type str or Path')
         file_path = expanduser(file_path)
         if not isfile(file_path):
-            raise FileNotFoundError('"{}" does not exist'.format(file_path))
+            raise FileNotFoundError(f'"{file_path}" does not exist')
         self._global_tags_file = file_path
 
     def track_tags(self, *track_ids, exclusive=False):
