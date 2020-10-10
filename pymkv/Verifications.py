@@ -4,8 +4,8 @@
 """Verification functions for mkvmerge and associated files."""
 
 import json
+import os
 from os.path import expanduser, isfile
-from pathlib import Path
 from re import match
 import subprocess as sp
 
@@ -36,7 +36,7 @@ def verify_matroska(file_path, mkvmerge_path='mkvmerge'):
     if not verify_mkvmerge(mkvmerge_path=mkvmerge_path):
         raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change the mkvmerge_path '
                                 'property')
-    if isinstance(file_path, Path):
+    if isinstance(file_path, os.PathLike):
         file_path = str(file_path)
     elif not isinstance(file_path, str):
         raise TypeError('"{}" is not of type str'.format(file_path))
