@@ -43,6 +43,7 @@ import subprocess as sp
 import bitmath
 
 from pymkv.MKVTrack import MKVTrack
+from pymkv.MKVAppend import MKVAppend
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.Timestamp import Timestamp
 from pymkv.ISO639_2 import is_ISO639_2
@@ -158,45 +159,48 @@ class MKVFile:
             command.extend(['--title', self.title])
         # add tracks
         for track in self.tracks:
-            # flags
-            if track.track_name is not None:
-                command.extend(['--track-name', str(track.track_id) + ':' + track.track_name])
-            if track.language is not None:
-                command.extend(['--language', str(track.track_id) + ':' + track.language])
-            if track.tags is not None:
-                command.extend(['--tags', str(track.track_id) + ':' + track.tags])
-            if track.default_track:
-                command.extend(['--default-track', str(track.track_id) + ':1'])
-            else:
-                command.extend(['--default-track', str(track.track_id) + ':0'])
-            if track.forced_track:
-                command.extend(['--forced-track', str(track.track_id) + ':1'])
-            else:
-                command.extend(['--forced-track', str(track.track_id) + ':0'])
+            if(not track.append):
+                # flags
+                if track.track_name is not None:
+                    command.extend(['--track-name', str(track.track_id) + ':' + track.track_name])
+                if track.language is not None:
+                    command.extend(['--language', str(track.track_id) + ':' + track.language])
+                if track.tags is not None:
+                    command.extend(['--tags', str(track.track_id) + ':' + track.tags])
+                if track.default_track:
+                    command.extend(['--default-track', str(track.track_id) + ':1'])
+                else:
+                    command.extend(['--default-track', str(track.track_id) + ':0'])
+                if track.forced_track:
+                    command.extend(['--forced-track', str(track.track_id) + ':1'])
+                else:
+                    command.extend(['--forced-track', str(track.track_id) + ':0'])
 
-            # remove extra tracks
-            if track.track_type != 'video':
-                command.append('-D')
-            else:
-                command.extend(['-d', str(track.track_id)])
-            if track.track_type != 'audio':
-                command.append('-A')
-            else:
-                command.extend(['-a', str(track.track_id)])
-            if track.track_type != 'subtitles':
-                command.append('-S')
-            else:
-                command.extend(['-s', str(track.track_id)])
+                # remove extra tracks
+                if track.track_type != 'video':
+                    command.append('-D')
+                else:
+                    command.extend(['-d', str(track.track_id)])
+                if track.track_type != 'audio':
+                    command.append('-A')
+                else:
+                    command.extend(['-a', str(track.track_id)])
+                if track.track_type != 'subtitles':
+                    command.append('-S')
+                else:
+                    command.extend(['-s', str(track.track_id)])
 
-            # exclusions
-            if track.no_chapters:
-                command.append('--no-chapters')
-            if track.no_global_tags:
-                command.append('--no-global-tags')
-            if track.no_track_tags:
-                command.append('--no-track-tags')
-            if track.no_attachments:
-                command.append('--no-attachments')
+                # exclusions
+                if track.no_chapters:
+                    command.append('--no-chapters')
+                if track.no_global_tags:
+                    command.append('--no-global-tags')
+                if track.no_track_tags:
+                    command.append('--no-track-tags')
+                if track.no_attachments:
+                    command.append('--no-attachments')
+            elif(not track.root_track):
+                command.append('+')
 
             # add path
             command.append(track.file_path)
@@ -285,6 +289,26 @@ class MKVFile:
             self.tracks = self.tracks + file.tracks
         else:
             raise TypeError('track is not str or MKVFile')
+
+    def append_track(self, track):
+        """Add a track to the :class:`~pymkv.MKVFile`.
+
+        Parameters
+        ----------
+        track : str, :class:`~pymkv.MKVTrack`
+            The track to be added to the :class:`~pymkv.MKVFile` object.
+
+        Raises
+        ------
+        TypeError
+            Raised if `track` is not a string-like path to a track file or an :class:`~pymkv.MKVTrack`.
+        """
+        if isinstance(track, str):
+            self.tracks.append(MKVAppend(track))
+        elif isinstance(track, MKVAppend):
+            self.tracks.append(track)
+        else:
+            raise TypeError('track is not str or MKVAppend')
 
     def add_track(self, track):
         """Add a track to the :class:`~pymkv.MKVFile`.
