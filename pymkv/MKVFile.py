@@ -106,6 +106,8 @@ class MKVFile:
                     new_track.track_name = track['properties']['track_name']
                 if 'language' in track['properties']:
                     new_track.language = track['properties']['language']
+                if 'language_ietf' in track['properties']:
+                    new_track.language_ietf = track['properties']['language_ietf']
                 if 'default_track' in track['properties']:
                     new_track.default_track = track['properties']['default_track']
                 if 'forced_track' in track['properties']:
@@ -161,7 +163,9 @@ class MKVFile:
             # flags
             if track.track_name is not None:
                 command.extend(['--track-name', str(track.track_id) + ':' + track.track_name])
-            if track.language is not None:
+            if track.language_ietf is not None:
+                command.extend(['--language', str(track.track_id) + ':' + track.language_ietf])
+            elif track.language is not None:
                 command.extend(['--language', str(track.track_id) + ':' + track.language])
             if track.tags is not None:
                 command.extend(['--tags', str(track.track_id) + ':' + track.tags])
