@@ -146,7 +146,7 @@ class MKVTrack:
     @file_path.setter
     def file_path(self, file_path):
         file_path = expanduser(file_path)
-        if not verify_supported(file_path):
+        if not verify_supported(file_path, mkvmerge_path=self.mkvmerge_path):
             raise ValueError('"{}" is not a supported file')
         self._file_path = file_path
         self.track_id = 0
