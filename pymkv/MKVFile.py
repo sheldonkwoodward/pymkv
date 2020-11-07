@@ -79,8 +79,8 @@ class MKVFile:
         Raised if the path to mkvmerge could not be verified.
     """
 
-    def __init__(self, file_path=None, title=None):
-        self.mkvmerge_path = 'mkvmerge'
+    def __init__(self, file_path=None, title=None, mkvmerge_path='mkvmerge'):
+        self.mkvmerge_path = mkvmerge_path
         self.title = title
         self._chapters_file = None
         self._chapter_language = None
@@ -249,15 +249,7 @@ class MKVFile:
             The path to be used as the output file in the mkvmerge command.
         silent : bool, optional
             By default the mkvmerge output will be shown unless silent is True.
-
-        Raises
-        ------
-        FileNotFoundError
-            Raised if the path to mkvmerge could not be verified.
         """
-        if not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
-            raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change the mkvmerge_path '
-                                    'property')
         output_path = expanduser(output_path)
         if silent:
             sp.run(self.command(output_path, subprocess=True), stdout=open(devnull, 'wb'), check=True)
