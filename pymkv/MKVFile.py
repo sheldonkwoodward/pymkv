@@ -36,8 +36,8 @@ Combine two MKVs. This example takes two existing MKVs and combines their tracks
 """
 
 import json
-from os import devnull
-from os.path import expanduser, isfile
+from os import devnull, makedirs
+from os.path import expanduser, isfile, isdir
 import subprocess as sp
 
 import bitmath
@@ -46,7 +46,7 @@ from pymkv.MKVTrack import MKVTrack
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.Timestamp import Timestamp
 from pymkv.ISO639_2 import is_ISO639_2
-from pymkv.Verifications import verify_matroska, verify_mkvmerge
+from pymkv.Verifications import verify_matroska, verify_mkvmerge, verify_mkvextract
 
 
 class MKVFile:
@@ -81,6 +81,8 @@ class MKVFile:
 
     def __init__(self, file_path=None, title=None):
         self.mkvmerge_path = 'mkvmerge'
+        self.mkvextract_path = 'mkvextract'
+        self.file_path = file_path
         self.title = title
         self._chapters_file = None
         self._chapter_language = None
@@ -474,6 +476,67 @@ class MKVFile:
             del self.tracks[track_num]
         else:
             raise IndexError('track index out of range')
+
+    def extract_track(self, track_num, output_path, silent=False):
+        """Extract a :class:`~pymkv.MKVTrack` from the :class:`~pymkv.MKVFile` object.
+
+        Parameters
+        ----------
+        track_num : int
+            Index of the track to extract.
+        output_path : str
+            The path to be used as the output file in the mkvextract command.
+        silent : bool, optional
+            By default the mkvextract output will be shown unless silent is True.
+
+        Raises
+        ------
+        FileNotFoundError
+            Raised if the path to mkvextract could not be verified.
+        IndexError
+            Raised if `track_num` is is out of range of the track list.
+        """
+        if not verify_mkvextract(mkvextract_path=self.mkvextract_path):
+            raise FileNotFoundError('mkvextract is not at the specified path, add it there or change the mkvextract_path '
+                                    'property')
+        output_path = expanduser(output_path)
+        track = self.get_track(track_num)
+        command = [self.mkvextract_path, track.file_path, 'tracks', f'{track.track_id}:{output_path}']
+        if silent:
+            sp.run(command, check=True, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+        else:
+            print(f'Running with command:\n"{command}"')
+            sp.run(command, check=True, capture_output=True)
+
+    def extract_attachments(self, output_directory, silent=False):
+        """Extract all :class:`~pymkv.MKVAttachment` from the :class:`~pymkv.MKVFile` object.
+
+        Parameters
+        ----------
+        output_directory : str
+            The output directory to be used in the mkvextract command.
+        silent : bool, optional
+            By default the mkvextract output will be shown unless silent is True.
+
+        Raises
+        ------
+        FileNotFoundError
+            Raised if the path to mkvextract could not be verified.
+        """
+        if not verify_mkvextract(mkvextract_path=self.mkvextract_path):
+            raise FileNotFoundError('mkvextract is not at the specified path, add it there or change the mkvextract_path '
+                                    'property')
+        output_directory = expanduser(output_directory)
+        if not isdir(output_directory):
+            makedirs(output_directory)
+        command = [self.mkvextract_path, self.file_path, 'attachments']
+        for i, a in enumerate(self.attachments):
+            command.append(f"{output_directory}/{i}:{a.name}")
+        if silent:
+            sp.run(command, check=True, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+        else:
+            print(f'Running with command:\n"{command}"')
+            sp.run(command, check=True, capture_output=True)
 
     def split_none(self):
         """Remove all splitting options."""
