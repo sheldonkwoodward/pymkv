@@ -102,6 +102,7 @@ class MKVTrack:
         # track info
         self._track_codec = None
         self._track_type = None
+        self._audio_channels = 0
 
         # base
         self.mkvmerge_path = 'mkvmerge'
@@ -171,6 +172,8 @@ class MKVTrack:
         self._track_id = track_id
         self._track_codec = info_json['tracks'][track_id]['codec']
         self._track_type = info_json['tracks'][track_id]['type']
+        if self._track_type == 'audio':
+            self._audio_channels = info_json['tracks'][track_id]['properties']['audio_channels']
 
     @property
     def language(self):
@@ -226,3 +229,8 @@ class MKVTrack:
     def track_type(self):
         """str: The type of track such as video or audio."""
         return self._track_type
+
+    @property
+    def audio_channels(self):
+        """int: The number of audio channels in the track."""
+        return self._audio_channels
