@@ -113,6 +113,12 @@ class MKVFile:
                 if 'forced_track' in track['properties']:
                     new_track.forced_track = track['properties']['forced_track']
                 self.add_track(new_track)
+            
+            # add attachments with info
+            for attachment in info_json['attachments']:
+                new_attachment = MKVAttachment(file_path, attachment['id'], attachment['file_name'], attachment['description'])
+                new_attachment.mime_type = attachment['content_type']
+                self.add_attachment(new_attachment)
 
         # split options
         self._split_options = []
@@ -191,20 +197,23 @@ class MKVFile:
                 command.extend(['-s', str(track.track_id)])
 
             # exclusions
+            command.append('--no-attachments')
             if track.no_chapters:
                 command.append('--no-chapters')
             if track.no_global_tags:
                 command.append('--no-global-tags')
             if track.no_track_tags:
                 command.append('--no-track-tags')
-            if track.no_attachments:
-                command.append('--no-attachments')
 
             # add path
             command.append(track.file_path)
 
         # add attachments
-        for attachment in self.attachments:
+        own_attachments = [a for a in self.attachments if a.file_path == self.file_path]
+        if own_attachments:
+            command += ['-D', '-A', '-S', '-B', '-T', '--no-chapters', '-m', ",".join(str(a.attachment_id) for a in own_attachments), self.file_path]
+
+        for attachment in (a for a in self.attachments if a.file_path != self.file_path):
             # info
             if attachment.name is not None:
                 command.extend(['--attachment-name', attachment.name])
@@ -508,13 +517,15 @@ class MKVFile:
             print(f'Running with command:\n"{command}"')
             sp.run(command, check=True, capture_output=True)
 
-    def extract_attachments(self, output_directory, silent=False):
+    def extract_attachments(self, output_directory, attachment_ids=[], silent=False):
         """Extract all :class:`~pymkv.MKVAttachment` from the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
         output_directory : str
             The output directory to be used in the mkvextract command.
+        attachment_ids : list[int]
+            The IDs of attachments to extract.
         silent : bool, optional
             By default the mkvextract output will be shown unless silent is True.
 
@@ -530,8 +541,11 @@ class MKVFile:
         if not isdir(output_directory):
             makedirs(output_directory)
         command = [self.mkvextract_path, self.file_path, 'attachments']
-        for i, a in enumerate(self.attachments):
-            command.append(f"{output_directory}/{i}:{a.name}")
+        own_attachments = [a for a in self.attachments if a.file_path == self.file_path]
+        if attachment_ids:
+            own_attachments = [a for a in own_attachments if a.attachment_id in attachment_ids]
+        for a in own_attachments:
+            command.append(f"{a.attachment_id}:{output_directory}/{a.name}")
         if silent:
             sp.run(command, check=True, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
         else:
