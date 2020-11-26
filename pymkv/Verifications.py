@@ -24,6 +24,19 @@ def verify_mkvmerge(mkvmerge_path='mkvmerge'):
         return True
     return False
 
+def verify_mkvextract(mkvextract_path='mkvextract'):
+    """Verify mkvextract is working.
+
+    mkvextract_path (str):
+        Alternate path to mkvextract if it is not already in the $PATH variable.
+    """
+    try:
+        output = sp.check_output([mkvextract_path, '-V']).decode()
+    except (sp.CalledProcessError, FileNotFoundError):
+        return False
+    if match('mkvextract.*', output):
+        return True
+    return False
 
 def verify_matroska(file_path, mkvmerge_path='mkvmerge'):
     """Verify if a file is a Matroska file.

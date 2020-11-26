@@ -55,10 +55,11 @@ class MKVAttachment:
         which will attach to all files.
     """
 
-    def __init__(self, file_path, name=None, description=None, attach_once=False):
+    def __init__(self, file_path, attachment_id=1, name=None, description=None, attach_once=False):
         self.mime_type = None
         self._file_path = None
         self.file_path = file_path
+        self.attachment_id = attachment_id
         self.name = name
         self.description = description
         self.attach_once = attach_once
