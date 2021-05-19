@@ -112,6 +112,14 @@ class MKVFile:
                     new_track.default_track = track['properties']['default_track']
                 if 'forced_track' in track['properties']:
                     new_track.forced_track = track['properties']['forced_track']
+                if 'flag_commentary' in track['properties']:
+                    new_track.flag_commentary = track['properties']['flag_commentary']
+                if 'flag_hearing_impaired' in track['properties']:
+                    new_track.flag_hearing_impaired = track['properties']['flag_hearing_impaired']
+                if 'flag_visual_impaired' in track['properties']:
+                    new_track.flag_visual_impaired = track['properties']['flag_visual_impaired']
+                if 'flag_original' in track['properties']:
+                    new_track.flag_original = track['properties']['flag_original']
                 self.add_track(new_track)
 
         # split options
@@ -177,6 +185,22 @@ class MKVFile:
                 command.extend(['--forced-track', str(track.track_id) + ':1'])
             else:
                 command.extend(['--forced-track', str(track.track_id) + ':0'])
+            if track.flag_hearing_impaired:
+                command.extend(['--hearing-impaired-flag', str(track.track_id) + ':1'])
+            else:
+                command.extend(['--hearing-impaired-flag', str(track.track_id) + ':0'])
+            if track.flag_visual_impaired:
+                command.extend(['--visual-impaired-flag', str(track.track_id) + ':1'])
+            else:
+                command.extend(['--visual-impaired-flag', str(track.track_id) + ':0'])
+            if track.flag_original:
+                command.extend(['--original-flag', str(track.track_id) + ':1'])
+            else:
+                command.extend(['--original-flag', str(track.track_id) + ':0'])
+            if track.flag_commentary:
+                command.extend(['--commentary-flag', str(track.track_id) + ':1'])
+            else:
+                command.extend(['--commentary-flag', str(track.track_id) + ':0'])
 
             # remove extra tracks
             if track.track_type != 'video':

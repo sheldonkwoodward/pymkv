@@ -101,7 +101,9 @@ class MKVTrack:
         that are already part of an MKV file.
     """
 
-    def __init__(self, file_path, track_id=0, track_name=None, language=None, language_ietf=None, default_track=False, forced_track=False):
+    def __init__(self, file_path, track_id=0, track_name=None, language=None, language_ietf=None, default_track=False,
+                 forced_track=False, flag_commentary=False, flag_hearing_impaired=False, flag_visual_impaired=False,
+                 flag_original=False):
         # track info
         self._track_codec = None
         self._track_type = None
@@ -122,6 +124,10 @@ class MKVTrack:
         self._tags = None
         self.default_track = default_track
         self.forced_track = forced_track
+        self.flag_commentary = flag_commentary
+        self.flag_hearing_impaired = flag_hearing_impaired
+        self.flag_visual_impaired = flag_visual_impaired
+        self.flag_original = flag_original
 
         # exclusions
         self.no_chapters = False
