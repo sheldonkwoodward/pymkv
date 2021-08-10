@@ -93,9 +93,6 @@ class MKVFile:
         self._link_to_next_file = None
         self.tracks = []
         self.attachments = []
-        if file_path is not None and not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
-            raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change the mkvmerge_path '
-                                    'property')
         if file_path is not None and verify_matroska(file_path, mkvmerge_path=self.mkvmerge_path):
             # add file title
             file_path = expanduser(file_path)
