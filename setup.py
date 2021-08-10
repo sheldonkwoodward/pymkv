@@ -17,7 +17,8 @@ setup_requires = [
 
 install_requires = [
     'bitmath',
-    'iso-639'
+    'iso-639',
+    'bcp47'
 ]
 
 

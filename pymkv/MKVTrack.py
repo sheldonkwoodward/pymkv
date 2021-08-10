@@ -41,6 +41,7 @@ import subprocess as sp
 
 from pymkv.Verifications import verify_supported
 from pymkv.ISO639_2 import is_ISO639_2
+from pymkv.BCP47 import is_BCP47
 
 
 class MKVTrack:
@@ -63,6 +64,8 @@ class MKVTrack:
         The name that will be given to the track when muxed into a file.
     language : str, optional
         The language of the track. It must be an ISO639-2 language code.
+    language_ietf : str, optional
+        The language of the track. It must be a BCP47 language code. Has priority over 'language'.
     default_track : bool, optional
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool, optional
@@ -98,7 +101,9 @@ class MKVTrack:
         that are already part of an MKV file.
     """
 
-    def __init__(self, file_path, track_id=0, track_name=None, language=None, default_track=False, forced_track=False):
+    def __init__(self, file_path, track_id=0, track_name=None, language=None, language_ietf=None, default_track=False,
+                 forced_track=False, flag_commentary=False, flag_hearing_impaired=False, flag_visual_impaired=False,
+                 flag_original=False):
         # track info
         self._track_codec = None
         self._track_type = None
@@ -114,9 +119,15 @@ class MKVTrack:
         self.track_name = track_name
         self._language = None
         self.language = language
+        self._language_ietf = None
+        self.language_ietf = language_ietf
         self._tags = None
         self.default_track = default_track
         self.forced_track = forced_track
+        self.flag_commentary = flag_commentary
+        self.flag_hearing_impaired = flag_hearing_impaired
+        self.flag_visual_impaired = flag_visual_impaired
+        self.flag_original = flag_original
 
         # exclusions
         self.no_chapters = False
@@ -192,6 +203,25 @@ class MKVTrack:
             self._language = language
         else:
             raise ValueError('not an ISO639-2 language code')
+
+    @property
+    def language_ietf(self):
+        """str: The language of the track with BCP47 format.
+        Setting this property will verify that the passed in language is a BCP47 language code and use it as the
+        language for the track.
+        Raises
+        ------
+        ValueError
+            Raised if the passed in language is not a BCP47 language code.
+        """
+        return self._language_ietf
+
+    @language_ietf.setter
+    def language_ietf(self, language_ietf):
+        if language_ietf is None or is_BCP47(language_ietf):
+            self._language_ietf = language_ietf
+        else:
+            raise ValueError('not a BCP47 language code')
 
     @property
     def tags(self):
