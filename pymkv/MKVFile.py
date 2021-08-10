@@ -72,6 +72,10 @@ class MKVFile:
     title : str, optional
         The internal title given to the :class:`~pymkv.MKVFile`. If `title` is not specified, the title of the
         pre-existing file will be used if it exists.
+    mkvmerge_path : str, optional
+        The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
+        files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
+        *mkvmerge_path* to the executable location.
 
     Raises
     ------
@@ -79,8 +83,8 @@ class MKVFile:
         Raised if the path to mkvmerge could not be verified.
     """
 
-    def __init__(self, file_path=None, title=None):
-        self.mkvmerge_path = 'mkvmerge'
+    def __init__(self, file_path=None, title=None, mkvmerge_path='mkvmerge'):
+        self.mkvmerge_path = mkvmerge_path
         self.title = title
         self._chapters_file = None
         self._chapter_language = None
@@ -92,7 +96,7 @@ class MKVFile:
         if file_path is not None and not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
             raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change the mkvmerge_path '
                                     'property')
-        if file_path is not None and verify_matroska(file_path):
+        if file_path is not None and verify_matroska(file_path, mkvmerge_path=self.mkvmerge_path):
             # add file title
             file_path = expanduser(file_path)
             info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', file_path]).decode())
@@ -101,7 +105,7 @@ class MKVFile:
 
             # add tracks with info
             for track in info_json['tracks']:
-                new_track = MKVTrack(file_path, track_id=track['id'])
+                new_track = MKVTrack(file_path, track_id=track['id'], mkvmerge_path=self.mkvmerge_path)
                 if 'track_name' in track['properties']:
                     new_track.track_name = track['properties']['track_name']
                 if 'language' in track['properties']:
@@ -277,15 +281,7 @@ class MKVFile:
             The path to be used as the output file in the mkvmerge command.
         silent : bool, optional
             By default the mkvmerge output will be shown unless silent is True.
-
-        Raises
-        ------
-        FileNotFoundError
-            Raised if the path to mkvmerge could not be verified.
         """
-        if not verify_mkvmerge(mkvmerge_path=self.mkvmerge_path):
-            raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change the mkvmerge_path '
-                                    'property')
         output_path = expanduser(output_path)
         if silent:
             sp.run(self.command(output_path, subprocess=True), stdout=open(devnull, 'wb'), check=True)
@@ -328,7 +324,7 @@ class MKVFile:
             Raised if `track` is not a string-like path to a track file or an :class:`~pymkv.MKVTrack`.
         """
         if isinstance(track, str):
-            self.tracks.append(MKVTrack(track))
+            self.tracks.append(MKVTrack(track), mkvmerge_path=self.mkvmerge_path)
         elif isinstance(track, MKVTrack):
             self.tracks.append(track)
         else:

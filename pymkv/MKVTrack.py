@@ -70,13 +70,15 @@ class MKVTrack:
         Determines if the track should be the default track of its type when muxed into an MKV file.
     forced_track : bool, optional
         Determines if the track should be a forced track when muxed into an MKV file.
+    mkvmerge_path : str, optional
+        The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
+        files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
+        *mkvmerge_path* to the executable location.
 
     Attributes
     ----------
     mkvmerge_path : str
-        The path where pymkv looks for the mkvmerge executable. pymkv relies on the mkvmerge executable to parse
-        files. By default, it is assumed mkvmerge is in your shell's $PATH variable. If it is not, you need to set
-        *mkvmerge_path* to the executable location.
+        The path of the mkvmerge executable.
     track_name : str
         The name that will be given to the track when muxed into a file.
     default_track : bool
@@ -103,13 +105,13 @@ class MKVTrack:
 
     def __init__(self, file_path, track_id=0, track_name=None, language=None, language_ietf=None, default_track=False,
                  forced_track=False, flag_commentary=False, flag_hearing_impaired=False, flag_visual_impaired=False,
-                 flag_original=False):
+                 flag_original=False, mkvmerge_path='mkvmerge'):
         # track info
         self._track_codec = None
         self._track_type = None
 
         # base
-        self.mkvmerge_path = 'mkvmerge'
+        self.mkvmerge_path = mkvmerge_path
         self._file_path = None
         self.file_path = file_path
         self._track_id = None
@@ -155,7 +157,7 @@ class MKVTrack:
     @file_path.setter
     def file_path(self, file_path):
         file_path = expanduser(file_path)
-        if not verify_supported(file_path):
+        if not verify_supported(file_path, mkvmerge_path=self.mkvmerge_path):
             raise ValueError('"{}" is not a supported file')
         self._file_path = file_path
         self.track_id = 0
