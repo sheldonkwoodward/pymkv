@@ -93,38 +93,36 @@ class MKVFile:
         self._link_to_next_file = None
         self.tracks = []
         self.attachments = []
-        if file_path is not None and verify_matroska(file_path, mkvmerge_path=self.mkvmerge_path):
-            # add file title
-            file_path = expanduser(file_path)
-            info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', file_path]).decode())
-            if self.title is None and 'title' in info_json['container']['properties']:
-                self.title = info_json['container']['properties']['title']
-
-            # add tracks with info
-            for track in info_json['tracks']:
-                new_track = MKVTrack(file_path, track_id=track['id'], mkvmerge_path=self.mkvmerge_path)
-                if 'track_name' in track['properties']:
-                    new_track.track_name = track['properties']['track_name']
-                if 'language' in track['properties']:
-                    new_track.language = track['properties']['language']
-                if 'language_ietf' in track['properties']:
-                    new_track.language_ietf = track['properties']['language_ietf']
-                if 'default_track' in track['properties']:
-                    new_track.default_track = track['properties']['default_track']
-                if 'forced_track' in track['properties']:
-                    new_track.forced_track = track['properties']['forced_track']
-                if 'flag_commentary' in track['properties']:
-                    new_track.flag_commentary = track['properties']['flag_commentary']
-                if 'flag_hearing_impaired' in track['properties']:
-                    new_track.flag_hearing_impaired = track['properties']['flag_hearing_impaired']
-                if 'flag_visual_impaired' in track['properties']:
-                    new_track.flag_visual_impaired = track['properties']['flag_visual_impaired']
-                if 'flag_original' in track['properties']:
-                    new_track.flag_original = track['properties']['flag_original']
-                self.add_track(new_track)
-
-        # split options
         self._split_options = []
+        if not verify_mkvmerge(mkvmerge_path=mkvmerge_path):
+            raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change'
+                                    'the mkvmerge_path property')
+        if file_path is not None:
+            file_path = expanduser(file_path)
+            info = json.loads(sp.check_output([self.mkvmerge_path, '-J', file_path]).decode())
+            if info['container']['recognized'] is True and info['container']['supported'] is True:
+                # add tracks with info
+                for track in info['tracks']:
+                    new_track = MKVTrack(file_path, track_id=track['id'], mkvmerge_path=self.mkvmerge_path)
+                    if 'track_name' in track['properties']:
+                        new_track.track_name = track['properties']['track_name']
+                    if 'language' in track['properties']:
+                        new_track.language = track['properties']['language']
+                    if 'language_ietf' in track['properties']:
+                        new_track.language_ietf = track['properties']['language_ietf']
+                    if 'default_track' in track['properties']:
+                        new_track.default_track = track['properties']['default_track']
+                    if 'forced_track' in track['properties']:
+                        new_track.forced_track = track['properties']['forced_track']
+                    if 'flag_commentary' in track['properties']:
+                        new_track.flag_commentary = track['properties']['flag_commentary']
+                    if 'flag_hearing_impaired' in track['properties']:
+                        new_track.flag_hearing_impaired = track['properties']['flag_hearing_impaired']
+                    if 'flag_visual_impaired' in track['properties']:
+                        new_track.flag_visual_impaired = track['properties']['flag_visual_impaired']
+                    if 'flag_original' in track['properties']:
+                        new_track.flag_original = track['properties']['flag_original']
+                    self.add_track(new_track)
 
     def __repr__(self):
         return repr(self.__dict__)
