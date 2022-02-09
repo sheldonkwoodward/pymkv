@@ -7,6 +7,7 @@ import json
 import os
 from os.path import expanduser, isfile
 from re import match
+from shutil import which
 import subprocess as sp
 
 
@@ -16,13 +17,7 @@ def verify_mkvmerge(mkvmerge_path='mkvmerge'):
     mkvmerge_path (str):
         Alternate path to mkvmerge if it is not already in the $PATH variable.
     """
-    try:
-        output = sp.check_output([mkvmerge_path, '-V']).decode()
-    except (sp.CalledProcessError, FileNotFoundError):
-        return False
-    if match('mkvmerge.*', output):
-        return True
-    return False
+    return which(mkvmerge_path) is not None
 
 
 def verify_matroska(file_path, mkvmerge_path='mkvmerge'):
