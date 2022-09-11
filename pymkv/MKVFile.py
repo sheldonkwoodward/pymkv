@@ -93,7 +93,12 @@ class MKVFile:
         self._link_to_next_file = None
         self.tracks = []
         self.attachments = []
-        if file_path is not None and verify_matroska(file_path, mkvmerge_path=self.mkvmerge_path):
+
+        if not verify_mkvmerge(mkvmerge_path=mkvmerge_path):
+            raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change'
+                                    'the mkvmerge_path property')
+
+        if file_path is not None:
             # add file title
             file_path = expanduser(file_path)
             info_json = json.loads(sp.check_output([self.mkvmerge_path, '-J', file_path]).decode())
