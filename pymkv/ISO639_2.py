@@ -5,9 +5,10 @@
 
 from iso639 import languages
 
-def is_ISO639_2(language):
-  try:
-    languages.get(part2b=language)
-    return True
-  except KeyError:
-    return False
+
+def is_iso639_2(language):
+    try:
+        languages.get(part2b=language)
+        return True
+    except KeyError:
+        return False

@@ -45,7 +45,7 @@ import bitmath
 from pymkv.MKVTrack import MKVTrack
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.Timestamp import Timestamp
-from pymkv.ISO639_2 import is_ISO639_2
+from pymkv.ISO639_2 import is_iso639_2
 from pymkv.Verifications import verify_matroska, verify_mkvmerge
 
 
@@ -142,7 +142,7 @@ class MKVFile:
 
     @chapter_language.setter
     def chapter_language(self, language):
-        if language is not None and not is_ISO639_2(language):
+        if language is not None and not is_iso639_2(language):
             raise ValueError('not an ISO639-2 language code')
         self._chapter_language = language
 
@@ -595,18 +595,18 @@ class MKVFile:
         # check if in frames form
         f_flat = MKVFile.flatten(frames)
         if len(f_flat) == 0:
-            raise ValueError('"{}" are not properly formatted frames'.format(frames))
+            raise ValueError(f'"{frames}" are not properly formatted frames')
         for f in f_flat:
             if not isinstance(f, int):
-                raise TypeError('frame "{}" not an int'.format(f))
+                raise TypeError(f'frame "{f}" not an int')
         for f_1, f_2 in zip(f_flat[:-1], f_flat[1:]):
             if f_1 >= f_2:
-                raise ValueError('"{}" are not properly formatted frames'.format(frames))
+                raise ValueError(f'"{frames}" are not properly formatted frames')
 
         # build f_string from frames
         f_string = 'frames:'
         for f in f_flat:
-            f_string += str(f) + ','
+            f_string += f'{str(f)},'
         self._split_options = ['--split', f_string[:-1]]
         if link:
             self._split_options += '--link'
@@ -630,37 +630,29 @@ class MKVFile:
         ValueError
             Raised if `timestamp_parts` contains improperly formatted parts.
         """
-        # check if in parts form
         ts_flat = MKVFile.flatten(timestamp_parts)
         if len(timestamp_parts) == 0:
-            raise ValueError('"{}" are not properly formatted parts'.format(timestamp_parts))
+            raise ValueError(f'"{timestamp_parts}" are not properly formatted parts')
+
         if None in ts_flat[1:-1]:
-            raise ValueError('"{}" are not properly formatted parts'.format(timestamp_parts))
+            raise ValueError(f'"{timestamp_parts}" are not properly formatted parts')
+
         for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
             if None not in (ts_1, ts_2) and Timestamp(ts_1) >= Timestamp(ts_2):
-                raise ValueError('"{}" are not properly formatted parts'.format(timestamp_parts))
+                raise ValueError(f'"{timestamp_parts}" are not properly formatted parts')
 
-        # build ts_string from parts
         ts_string = 'parts:'
         for ts_set in timestamp_parts:
-            # flatten set
             ts_set = MKVFile.flatten(ts_set)
-
-            # check if in set form
             if not isinstance(ts_set, (list, tuple)):
                 raise TypeError('set is not of type list or tuple')
             if len(ts_set) < 2 or len(ts_set) % 2 != 0:
-                raise ValueError('"{}" is not a properly formatted set'.format(ts_set))
-
-            # build parts from sets
+                raise ValueError(f'"{ts_set}" is not a properly formatted set')
             for index, ts in enumerate(ts_set):
-                # check for combined split
                 if index % 2 == 0 and index > 0:
                     ts_string += '+'
-                # add timestamp if not None
                 if ts is not None:
                     ts_string += str(Timestamp(ts))
-                # add ',' or '-'
                 ts_string += '-' if index % 2 == 0 else ','
         self._split_options = ['--split', ts_string[:-1]]
         if link:
@@ -686,41 +678,28 @@ class MKVFile:
         ValueError
             Raised if `frame_parts` contains improperly formatted parts.
         """
-        # check if in parts form
         f_flat = MKVFile.flatten(frame_parts)
         if len(frame_parts) == 0:
-            raise ValueError('"{}" are not properly formatted parts'.format(frame_parts))
+            raise ValueError(f'"{frame_parts}" are not properly formatted parts')
         if None in f_flat[1:-1]:
-            raise ValueError('"{}" are not properly formatted parts'.format(frame_parts))
+            raise ValueError(f'"{frame_parts}" are not properly formatted parts')
         for f_1, f_2 in zip(f_flat[:-1], f_flat[1:]):
             if None not in (f_1, f_2) and f_1 >= f_2:
-                raise ValueError('"{}" are not properly formatted parts'.format(frame_parts))
-
-        # build f_string from parts
+                raise ValueError(f'"{frame_parts}" are not properly formatted parts')
         f_string = 'parts:'
         for f_set in frame_parts:
-            # flatten set
             f_set = MKVFile.flatten(f_set)
-
-            # check if in set form
             if not isinstance(f_set, (list, tuple)):
                 raise TypeError('set is not of type list or tuple')
             if len(f_set) < 2 or len(f_set) % 2 != 0:
-                raise ValueError('"{}" is not a properly formatted set'.format(f_set))
-
-            # build parts from sets
+                raise ValueError(f'"{f_set}" is not a properly formatted set')
             for index, f in enumerate(f_set):
-                # check if frames are ints
                 if not isinstance(f, int) and f is not None:
-                    raise TypeError('frame "{}" not an int'.format(f))
-
-                # check for combined split
+                    raise TypeError(f'frame "{f}" not an int')
                 if index % 2 == 0 and index > 0:
                     f_string += '+'
-                # add frame if not None
                 if f is not None:
                     f_string += str(f)
-                # add ',' or '-'
                 f_string += '-' if index % 2 == 0 else ','
         self._split_options = ['--split', f_string[:-1]]
         if link:
@@ -744,24 +723,21 @@ class MKVFile:
         ValueError
             Raised if `*chapters` contains improperly formatted chapters.
        """
-        # check if in chapters form
         c_flat = MKVFile.flatten(chapters)
-        if len(chapters) == 0:
+        if not chapters:
             self._split_options = ['--split', 'chapters:all']
             return
         for c in c_flat:
             if not isinstance(c, int):
-                raise TypeError('chapter "{}" not an int'.format(c))
+                raise TypeError(f'chapter "{c}" not an int')
             if c < 1:
-                raise ValueError('"{}" are not properly formatted chapters'.format(chapters))
+                raise ValueError(f'"{chapters}" are not properly formatted chapters')
         for c_1, c_2 in zip(c_flat[:-1], c_flat[1:]):
             if c_1 >= c_2:
-                raise ValueError('"{}" are not properly formatted chapters'.format(chapters))
-
-        # build c_string from chapters
+                raise ValueError(f'"{chapters}" are not properly formatted chapters')
         c_string = 'chapters:'
         for c in c_flat:
-            c_string += str(c) + ','
+            c_string += f'{str(c)},'
         self._split_options = ['--split', c_string[:-1]]
         if link:
             self._split_options += '--link'
@@ -781,12 +757,11 @@ class MKVFile:
         ValueError
             Raised if file at `file_path` cannot be verified as an MKV.
         """
-        # check if valid file
         if not isinstance(str, file_path):
-            raise TypeError('"{}" is not of type str'.format(file_path))
+            raise TypeError(f'"{file_path}" is not of type str')
         file_path = expanduser(file_path)
         if not verify_matroska(file_path):
-            raise ValueError('"{}" is not a matroska file'.format(file_path))
+            raise ValueError(f'"{file_path}" is not a matroska file')
         self._link_to_previous_file = file_path
 
     def link_to_next(self, file_path):
@@ -804,12 +779,11 @@ class MKVFile:
         ValueError
             Raised if file at `file_path` cannot be verified as an MKV.
         """
-        # check if valid file
         if not isinstance(file_path, str):
-            raise TypeError('"{}" is not of type str'.format(file_path))
+            raise TypeError(f'"{file_path}" is not of type str')
         file_path = expanduser(file_path)
         if not verify_matroska(file_path):
-            raise ValueError('"{}" is not a matroska file'.format(file_path))
+            raise ValueError(f'"{file_path}" is not a matroska file')
         self._link_to_next_file = file_path
 
     def link_to_none(self):
@@ -835,10 +809,10 @@ class MKVFile:
             Raised if `file_path` is not of type str.
         """
         if not isinstance(file_path, str):
-            raise TypeError('"{}" is not of type str'.format(file_path))
+            raise TypeError(f'"{file_path}" is not of type str')
         file_path = expanduser(file_path)
         if not isfile(file_path):
-            raise FileNotFoundError('"{}" does not exist'.format(file_path))
+            raise FileNotFoundError(f'"{file_path}" does not exist')
         self._chapters_file = file_path
         self.chapter_language = language
 
@@ -858,10 +832,10 @@ class MKVFile:
             Raised if `file_path` is not of type str.
         """
         if not isinstance(file_path, str):
-            raise TypeError('"{}" is not of type str'.format(file_path))
+            raise TypeError(f'"{file_path}" is not of type str')
         file_path = expanduser(file_path)
         if not isfile(file_path):
-            raise FileNotFoundError('"{}" does not exist'.format(file_path))
+            raise FileNotFoundError(f'"{file_path}" does not exist')
         self._global_tags_file = file_path
 
     def track_tags(self, *track_ids, exclusive=False):
@@ -884,16 +858,14 @@ class MKVFile:
         ValueError
             Raised if `*track_ids` are improperly formatted.
         """
-        # check if in track_ids form
         ids_flat = MKVFile.flatten(track_ids)
-        if len(track_ids) == 0:
-            raise ValueError('"{}" are not properly formatted track ids'.format(track_ids))
+        if not track_ids:
+            raise ValueError(f'"{track_ids}" are not properly formatted track ids')
         for tid in ids_flat:
             if not isinstance(tid, int):
-                raise TypeError('track id "{}" not an int'.format(tid))
+                raise TypeError(f'track id "{tid}" not an int')
             if tid < 0 or tid >= len(self.tracks):
                 raise IndexError('track id out of range')
-        # set no_track_tags
         for tid in ids_flat if exclusive else list(set(range(len(self.tracks))) - set(ids_flat)):
             self.tracks[tid].no_track_tags = True
 
@@ -939,10 +911,9 @@ class MKVFile:
         list
             A flattened version of `item`.
         """
-        flat_list = []
-        if isinstance(item, (list, tuple)):
-            for item in item:
-                flat_list.extend(MKVFile.flatten(item))
-            return flat_list
-        else:
+        if not isinstance(item, (list, tuple)):
             return [item]
+        flat_list = []
+        for item in item:
+            flat_list.extend(MKVFile.flatten(item))
+        return flat_list

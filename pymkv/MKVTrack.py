@@ -40,8 +40,8 @@ from os.path import expanduser, isfile
 import subprocess as sp
 
 from pymkv.Verifications import verify_supported
-from pymkv.ISO639_2 import is_ISO639_2
-from pymkv.BCP47 import is_BCP47
+from pymkv.ISO639_2 import is_iso639_2
+from pymkv.BCP47 import is_bcp47
 
 
 class MKVTrack:
@@ -201,7 +201,7 @@ class MKVTrack:
 
     @language.setter
     def language(self, language):
-        if language is None or is_ISO639_2(language):
+        if language is None or is_iso639_2(language):
             self._language = language
         else:
             raise ValueError('not an ISO639-2 language code')
@@ -220,7 +220,7 @@ class MKVTrack:
 
     @language_ietf.setter
     def language_ietf(self, language_ietf):
-        if language_ietf is None or is_BCP47(language_ietf):
+        if language_ietf is None or is_bcp47(language_ietf):
             self._language_ietf = language_ietf
         else:
             raise ValueError('not a BCP47 language code')
@@ -243,10 +243,10 @@ class MKVTrack:
     @tags.setter
     def tags(self, file_path):
         if not isinstance(file_path, str):
-            raise TypeError('"{}" is not of type str'.format(file_path))
+            raise TypeError(f'"{file_path}" is not of type str')
         file_path = expanduser(file_path)
         if not isfile(file_path):
-            raise FileNotFoundError('"{}" does not exist'.format(file_path))
+            raise FileNotFoundError(f'"{file_path}" does not exist')
         self._tags = file_path
 
     @property

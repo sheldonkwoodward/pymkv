@@ -108,7 +108,7 @@ class Timestamp:
         """Generates the timestamp specified in the object."""
         # parse timestamp format
         format_groups = match('^(([Hh]{1,2}):)?([Mm]{1,2}):([Ss]{1,2})(\.([Nn]{1,9}))?$', self.form).groups()
-        timestamp_format = [False if format_groups[i] is None else True for i in (1, 2, 3, 5)]
+        timestamp_format = [format_groups[i] is not None for i in (1, 2, 3, 5)]
 
         # create timestamp string
         timestamp_string = ''
@@ -131,13 +131,12 @@ class Timestamp:
             the basis of the timestamp.
         """
         if not isinstance(timestamp, (int, str)):
-            raise TypeError('"{}" is not str or int type'.format(type(timestamp)))
-        else:
-            self._hh = None
-            self._mm = None
-            self._ss = None
-            self._nn = None
-            self.extract(timestamp)
+            raise TypeError(f'"{type(timestamp)}" is not str or int type')
+        self._hh = None
+        self._mm = None
+        self._ss = None
+        self._nn = None
+        self.extract(timestamp)
 
     @property
     def hh(self):
@@ -187,7 +186,7 @@ class Timestamp:
             The timestamp to be verified.
         """
         if not isinstance(timestamp, str):
-            raise TypeError('"{}" is not str type'.format(type(timestamp)))
+            raise TypeError(f'"{type(timestamp)}" is not str type')
         elif match('^[0-9]{1,2}(:[0-9]{1,2}){1,2}(\.[0-9]{1,9})?$', timestamp):
             return True
         return False
@@ -200,27 +199,24 @@ class Timestamp:
             extracted from this parameter.
         """
         if not isinstance(timestamp, (str, int)):
-            raise TypeError('"{}" is not str or int type'.format(type(timestamp)))
+            raise TypeError(f'"{type(timestamp)}" is not str or int type')
         elif isinstance(timestamp, str) and not Timestamp.verify(timestamp):
-            raise ValueError('"{}" is not a valid timestamp'.format(timestamp))
+            raise ValueError(f'"{timestamp}" is not a valid timestamp')
         elif isinstance(timestamp, str):
-            # parse timestamp
             timestamp_groups = match('^(([0-9]{1,2}):)?([0-9]{1,2}):([0-9]{1,2})(\.([0-9]{1,9}))?$', timestamp).groups()
+
             timestamp = [timestamp_groups[i] for i in (1, 2, 3, 4)]
             timestamp_clean = []
-
-            # clean timestamp
             for ts in timestamp:
                 if ts is None:
                     timestamp_clean.append(0)
                 else:
                     timestamp_clean.append(float(ts))
-
-            # set timestamp variables
             self.hh = int(timestamp_clean[0]) if self._hh is None else self._hh
             self.mm = int(timestamp_clean[1]) if self._mm is None else self._mm
             self.ss = int(timestamp_clean[2]) if self._ss is None else self._ss
             self.nn = int(timestamp_clean[3] * 1000000000) if self._nn is None else self._nn
+
         elif isinstance(timestamp, int):
             self._hh = int(timestamp / 3600)
             self._mm = int(timestamp % 3600 / 60)
