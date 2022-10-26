@@ -42,7 +42,7 @@ import subprocess as sp
 
 import bitmath
 
-from pymkv.MKVTrack import MKVTrack
+from pymkv.MKVTrack import MKVTrack, MKVTrackIdNotFound
 from pymkv.MKVAttachment import MKVAttachment
 from pymkv.Timestamp import Timestamp
 from pymkv.ISO639_2 import is_ISO639_2
@@ -478,23 +478,24 @@ class MKVFile:
         else:
             raise IndexError('track index out of range')
 
-    def remove_track(self, track_num):
+    def remove_track(self, track_id):
         """Remove a track from the :class:`~pymkv.MKVFile` object.
 
         Parameters
         ----------
-        track_num : int
-            The track number of the track to remove.
+        track_id: int
+            The track id of the track to remove.
 
         Raises
         ------
-        IndexError
-            Raised if `track_num` is is out of range of the track list.
+        MKVTrackIdNotFound
+            Raised if `track_id` is not found in the track list.
         """
-        if 0 <= track_num < len(self.tracks):
-            del self.tracks[track_num]
-        else:
-            raise IndexError('track index out of range')
+        for track in self.tracks:
+            if (track.track_id == track_id):
+                self.tracks.remove(track)
+                return
+        raise MKVTrackIdNotFound('Track id not found in the track list')
 
     def split_none(self):
         """Remove all splitting options."""

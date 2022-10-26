@@ -258,3 +258,6 @@ class MKVTrack:
     def track_type(self):
         """str: The type of track such as video or audio."""
         return self._track_type
+
+class MKVTrackIdNotFound(Exception):
+    pass
