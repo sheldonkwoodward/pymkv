@@ -52,7 +52,15 @@ type_files = {
 def get_track_extension(track: MKVTrack) -> Optional[str]:
     """str: Extension of a track.
 
-    Return the extension of a track. If the track is a video, audio or subtitle track, an extension is returned.
+    Parameters
+    ----------
+    track : :class:`~pymkv.MKVTrack`
+        The :class:`~pymkv.MKVTrack` from which the file extension by track type will be obtained.
+
+    Returns
+    -------
+    str
+        Return the extension of a track. If the track is a video, audio or subtitle track, an extension is returned.
     """
     track_type = track.track_type
     track_codec = track.track_codec
