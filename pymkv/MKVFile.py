@@ -271,7 +271,7 @@ class MKVFile:
         return command if subprocess else " ".join(command)
 
     def mux(self, output_path, silent=False):
-        """Muxes the specified :class:`~pymkv.MKVFile`.
+        """Mixes the specified :class:`~pymkv.MKVFile`.
 
         Parameters
         ----------
@@ -363,9 +363,7 @@ class MKVFile:
             A list of all :class:`~pymkv.MKVTrack` objects in an :class:`~pymkv.MKVFile`. Returns a specific
             :class:`~pymkv.MKVTrack` if `track_num` is specified.
         """
-        if track_num is None:
-            return self.tracks
-        return self.tracks[track_num]
+        return self.tracks if track_num is None else self.tracks[track_num]
 
     def move_track_front(self, track_num):
         """Set a track as the first in the :class:`~pymkv.MKVFile` object.
@@ -521,7 +519,7 @@ class MKVFile:
             size = size.bytes
         elif not isinstance(size, int):
             raise TypeError('size is not a bitmath object or integer')
-        self._split_options = ['--split', 'size:{}'.format(size)]
+        self._split_options = ['--split', f'size:{size}']
         if link:
             self._split_options += '--link'
 
@@ -536,7 +534,7 @@ class MKVFile:
         link : bool, optional
             Determines if the split files should be linked together after splitting.
         """
-        self._split_options = ['--split', 'duration:' + str(Timestamp(duration))]
+        self._split_options = ['--split', f'duration:{str(Timestamp(duration))}']
         if link:
             self._split_options += '--link'
 
@@ -560,17 +558,17 @@ class MKVFile:
         # check if in timestamps form
         ts_flat = MKVFile.flatten(timestamps)
         if len(ts_flat) == 0:
-            raise ValueError('"{}" are not properly formatted timestamps'.format(timestamps))
+            raise ValueError(f'"{timestamps}" are not properly formatted timestamps')
         if None in ts_flat:
-            raise ValueError('"{}" are not properly formatted timestamps'.format(timestamps))
+            raise ValueError(f'"{timestamps}" are not properly formatted timestamps')
         for ts_1, ts_2 in zip(ts_flat[:-1], ts_flat[1:]):
             if Timestamp(ts_1) >= Timestamp(ts_2):
-                raise ValueError('"{}" are not properly formatted timestamps'.format(timestamps))
+                raise ValueError(f'"{timestamps}" are not properly formatted timestamps')
 
         # build ts_string from timestamps
         ts_string = 'timestamps:'
         for ts in ts_flat:
-            ts_string += str(Timestamp(ts)) + ','
+            ts_string += f'{str(Timestamp(ts))},'
         self._split_options = ['--split', ts_string[:-1]]
         if link:
             self._split_options += '--link'
