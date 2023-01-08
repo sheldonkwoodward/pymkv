@@ -176,52 +176,50 @@ class MKVFile:
         for track in self.tracks:
             # flags
             if track.track_name is not None:
-                command.extend(['--track-name', str(track.track_id) + ':' + track.track_name])
+                command.extend(['--track-name', f'{str(track.track_id)}:{track.track_name}'])
             if track.language_ietf is not None:
-                command.extend(['--language', str(track.track_id) + ':' + track.language_ietf])
+                command.extend(['--language', f'{str(track.track_id)}:{track.language_ietf}'])
             elif track.language is not None:
-                command.extend(['--language', str(track.track_id) + ':' + track.language])
+                command.extend(['--language', f'{str(track.track_id)}:{track.language}'])
+            if track.sync is not None:
+                command.extend(['--sync', f'{str(track.track_id)}:{track.sync}'])
             if track.tags is not None:
-                command.extend(['--tags', str(track.track_id) + ':' + track.tags])
+                command.extend(['--tags', f'{str(track.track_id)}:{track.tags}'])
             if track.default_track:
-                command.extend(['--default-track', str(track.track_id) + ':1'])
+                command.extend(['--default-track', f'{str(track.track_id)}:1'])
             else:
-                command.extend(['--default-track', str(track.track_id) + ':0'])
+                command.extend(['--default-track', f'{str(track.track_id)}:0'])
             if track.forced_track:
-                command.extend(['--forced-track', str(track.track_id) + ':1'])
+                command.extend(['--forced-track', f'{str(track.track_id)}:1'])
             else:
-                command.extend(['--forced-track', str(track.track_id) + ':0'])
+                command.extend(['--forced-track', f'{str(track.track_id)}:0'])
             if track.flag_hearing_impaired:
-                command.extend(['--hearing-impaired-flag', str(track.track_id) + ':1'])
+                command.extend(['--hearing-impaired-flag', f'{str(track.track_id)}:1'])
             else:
-                command.extend(['--hearing-impaired-flag', str(track.track_id) + ':0'])
+                command.extend(['--hearing-impaired-flag', f'{str(track.track_id)}:0'])
             if track.flag_visual_impaired:
-                command.extend(['--visual-impaired-flag', str(track.track_id) + ':1'])
+                command.extend(['--visual-impaired-flag', f'{str(track.track_id)}:1'])
             else:
-                command.extend(['--visual-impaired-flag', str(track.track_id) + ':0'])
+                command.extend(['--visual-impaired-flag', f'{str(track.track_id)}:0'])
             if track.flag_original:
-                command.extend(['--original-flag', str(track.track_id) + ':1'])
+                command.extend(['--original-flag', f'{str(track.track_id)}:1'])
             else:
-                command.extend(['--original-flag', str(track.track_id) + ':0'])
+                command.extend(['--original-flag', f'{str(track.track_id)}:0'])
             if track.flag_commentary:
-                command.extend(['--commentary-flag', str(track.track_id) + ':1'])
+                command.extend(['--commentary-flag', f'{str(track.track_id)}:1'])
             else:
-                command.extend(['--commentary-flag', str(track.track_id) + ':0'])
+                command.extend(['--commentary-flag', f'{str(track.track_id)}:0'])
 
             # remove extra tracks
-            if track.track_type != 'video':
+            if track.track_type == 'audio':
                 command.append('-D')
+                command.extend(['-a', str(track.track_id), '-S'])
+            elif track.track_type == 'subtitles':
+                command.extend(('-D', '-A', '-s', str(track.track_id)))
+            elif track.track_type == 'video':
+                command.extend(['-d', str(track.track_id), '-A', '-S'])
             else:
-                command.extend(['-d', str(track.track_id)])
-            if track.track_type != 'audio':
-                command.append('-A')
-            else:
-                command.extend(['-a', str(track.track_id)])
-            if track.track_type != 'subtitles':
-                command.append('-S')
-            else:
-                command.extend(['-s', str(track.track_id)])
-
+                command.extend(('-D', '-A', '-S'))
             # exclusions
             if track.no_chapters:
                 command.append('--no-chapters')
@@ -263,16 +261,14 @@ class MKVFile:
 
         # linking
         if self._link_to_previous_file is not None:
-            command.extend(['--link-to-previous', '=' + self._link_to_previous_file])
+            command.extend(['--link-to-previous', f'={self._link_to_previous_file}'])
         if self._link_to_next_file is not None:
-            command.extend(['--link-to-next', '=' + self._link_to_next_file])
+            command.extend(['--link-to-next', f'={self._link_to_next_file}'])
 
         # split options
         command.extend(self._split_options)
 
-        if subprocess:
-            return command
-        return " ".join(command)
+        return command if subprocess else " ".join(command)
 
     def mux(self, output_path, silent=False):
         """Muxes the specified :class:`~pymkv.MKVFile`.
