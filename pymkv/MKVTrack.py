@@ -36,9 +36,13 @@ Now all these tracks can be added to an :class:`~pymkv.MKVFile` object and muxed
 """
 
 import json
+import os.path
+from os import devnull
 from os.path import expanduser, isfile
 import subprocess as sp
+from pathlib import Path
 
+from pymkv.TypeTrack import get_track_extension
 from pymkv.Verifications import verify_supported
 from pymkv.ISO639_2 import is_iso639_2
 from pymkv.BCP47 import is_bcp47
@@ -105,7 +109,7 @@ class MKVTrack:
 
     def __init__(self, file_path, track_id=0, track_name=None, language=None, language_ietf=None, default_track=False,
                  forced_track=False, flag_commentary=False, flag_hearing_impaired=False, flag_visual_impaired=False,
-                 flag_original=False, mkvmerge_path='mkvmerge', sync=None):
+                 flag_original=False, mkvmerge_path='mkvmerge', mkvextract_path='mkvextract', sync=None):
         # track info
         self._track_codec = None
         self._track_type = None
@@ -138,6 +142,10 @@ class MKVTrack:
         self.no_global_tags = False
         self.no_track_tags = False
         self.no_attachments = False
+
+        # mkvextract
+        self.mkvextract_path = mkvextract_path
+        self.extension = get_track_extension(self)
 
     def __repr__(self):
         return repr(self.__dict__)
@@ -272,3 +280,33 @@ class MKVTrack:
     def track_type(self):
         """str: The type of track such as video or audio."""
         return self._track_type
+
+    def extract(self, output_path: str = None, silent: bool = False) -> str:
+        """Extract the track as a file.
+
+        Parameters
+        ----------
+        output_path : str
+            The path to be used as the output file in the mkvextract command.
+        silent : bool, optional
+            By default the mkvmerge output will be shown unless silent is True.
+        """
+        extract_info_file = f"_[{self.track_id}]"
+        if self.language:
+            extract_info_file += f"_{self.language}"
+        if self.extension:
+            extract_info_file += f".{self.extension}"
+        if (not self.language and not self.expansion) and self.track_name:
+            extract_info_file += f"_{self.track_name}"
+        if output_path is None:
+            output_path = f"{self.file_path}{extract_info_file}"
+        else:
+            file = Path(self.file_path)
+            output_path = os.path.join(output_path, f"{file.name}{extract_info_file}")
+        command = [self.mkvextract_path, 'tracks', f"{self.file_path}", f"{self.track_id}:{output_path}"]
+        if silent:
+            sp.run(command, stdout=open(devnull, 'wb'), check=True)
+        else:
+            print('Running with command:\n"' + " ".join(command) + '"')
+            sp.run(command, check=True, capture_output=True)
+        return output_path
