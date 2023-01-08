@@ -105,7 +105,7 @@ class MKVTrack:
 
     def __init__(self, file_path, track_id=0, track_name=None, language=None, language_ietf=None, default_track=False,
                  forced_track=False, flag_commentary=False, flag_hearing_impaired=False, flag_visual_impaired=False,
-                 flag_original=False, mkvmerge_path='mkvmerge'):
+                 flag_original=False, mkvmerge_path='mkvmerge', sync=None):
         # track info
         self._track_codec = None
         self._track_type = None
@@ -121,6 +121,8 @@ class MKVTrack:
         self.track_name = track_name
         self._language = None
         self.language = language
+        self._sync = None
+        self.sync = sync
         self._language_ietf = None
         self.language_ietf = language_ietf
         self._tags = None
@@ -205,6 +207,18 @@ class MKVTrack:
             self._language = language
         else:
             raise ValueError('not an ISO639-2 language code')
+
+    @property
+    def sync(self):
+        """int: track delay.
+
+        Setting this property allows you to wiggle the track negatively/positively.
+        """
+        return self._sync
+
+    @sync.setter
+    def sync(self, sync):
+        self._sync = sync
 
     @property
     def language_ietf(self):
