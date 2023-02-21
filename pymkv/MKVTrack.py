@@ -193,7 +193,10 @@ class MKVTrack:
         if not 0 <= track_id < len(info_json['tracks']):
             raise IndexError('track index out of range')
         self._track_id = track_id
-        self._pts = info_json['tracks'][track_id]["start_pts"]
+        try:
+            self._pts = info_json['tracks'][track_id]["start_pts"]
+        except KeyError:
+            self._pts = 0
         self._track_codec = info_json['tracks'][track_id]['codec']
         self._track_type = info_json['tracks'][track_id]['type']
 
