@@ -120,6 +120,7 @@ class MKVTrack:
         self.file_path = file_path
         self._track_id = None
         self.track_id = track_id
+        self._pts = 0
 
         # flags
         self.track_name = track_name
@@ -192,6 +193,7 @@ class MKVTrack:
         if not 0 <= track_id < len(info_json['tracks']):
             raise IndexError('track index out of range')
         self._track_id = track_id
+        self._pts = info_json['tracks'][track_id]["start_pts"]
         self._track_codec = info_json['tracks'][track_id]['codec']
         self._track_type = info_json['tracks'][track_id]['type']
 
@@ -215,6 +217,10 @@ class MKVTrack:
             self._language = language
         else:
             raise ValueError('not an ISO639-2 language code')
+
+    @property
+    def pts(self):
+        return self._pts
 
     @property
     def sync(self):
@@ -303,6 +309,7 @@ class MKVTrack:
         else:
             file = Path(self.file_path)
             output_path = os.path.join(output_path, f"{file.name}{extract_info_file}")
+        output_path = expanduser(output_path)
         command = [self.mkvextract_path, 'tracks', f"{self.file_path}", f"{self.track_id}:{output_path}"]
         if silent:
             sp.run(command, stdout=open(devnull, 'wb'), check=True)
