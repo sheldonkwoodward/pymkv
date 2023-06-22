@@ -929,4 +929,4 @@ class MKVFile:
     def _update_track_id_for_tracks(self) -> None:
         """An internal method to update the track_id for tracks in a file."""
         for index, track in enumerate(self.tracks):
-            track.track_id = index
+            track._track_id = index
