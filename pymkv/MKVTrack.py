@@ -120,6 +120,7 @@ class MKVTrack:
         self.file_path = file_path
         self._track_id = None
         self.track_id = track_id
+        self._file_id = 0
         self._pts = 0
 
         # flags

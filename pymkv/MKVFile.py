@@ -93,6 +93,7 @@ class MKVFile:
         self._link_to_next_file = None
         self.tracks: list[MKVTrack] = []
         self.attachments = []
+        self._number_file = 0
 
         if not verify_mkvmerge(mkvmerge_path=mkvmerge_path):
             raise FileNotFoundError('mkvmerge is not at the specified path, add it there or change'
@@ -233,6 +234,8 @@ class MKVFile:
             # add path
             command.append(track.file_path)
 
+            # command.append(f"--track-order {self.get_order_tracks()}")
+
         # add attachments
         for attachment in self.attachments:
             # info
@@ -303,10 +306,8 @@ class MKVFile:
         """
         if isinstance(file, str):
             self.tracks = self.tracks + MKVFile(file).tracks
-            self._update_track_id_for_tracks()
         elif isinstance(file, MKVFile):
             self.tracks = self.tracks + file.tracks
-            self._update_track_id_for_tracks()
         else:
             raise TypeError('track is not str or MKVFile')
 
@@ -382,7 +383,6 @@ class MKVFile:
         """
         if 0 <= track_num < len(self.tracks):
             self.tracks.insert(0, self.tracks.pop(track_num))
-            self._update_track_id_for_tracks()
         else:
             raise IndexError('track index out of range')
 
@@ -401,7 +401,6 @@ class MKVFile:
         """
         if 0 <= track_num < len(self.tracks):
             self.tracks.append(self.tracks.pop(track_num))
-            self._update_track_id_for_tracks()
         else:
             raise IndexError('track index out of range')
 
@@ -420,7 +419,6 @@ class MKVFile:
         """
         if 0 <= track_num < len(self.tracks) - 1:
             self.tracks[track_num], self.tracks[track_num + 1] = self.tracks[track_num + 1], self.tracks[track_num]
-            self._update_track_id_for_tracks()
         else:
             raise IndexError('track index out of range')
 
@@ -439,7 +437,6 @@ class MKVFile:
         """
         if 0 < track_num < len(self.tracks):
             self.tracks[track_num], self.tracks[track_num - 1] = self.tracks[track_num - 1], self.tracks[track_num]
-            self._update_track_id_for_tracks()
         else:
             raise IndexError('track index out of range')
 
@@ -460,7 +457,6 @@ class MKVFile:
         """
         if 0 <= track_num_1 < len(self.tracks) and 0 <= track_num_2 < len(self.tracks):
             self.tracks[track_num_1], self.tracks[track_num_2] = self.tracks[track_num_2], self.tracks[track_num_1]
-            self._update_track_id_for_tracks()
         else:
             raise IndexError('track index out of range')
 
@@ -481,7 +477,6 @@ class MKVFile:
         """
         if 0 <= track_num < len(self.tracks):
             self.tracks[track_num] = track
-            self._update_track_id_for_tracks()
         else:
             raise IndexError('track index out of range')
 
@@ -500,7 +495,6 @@ class MKVFile:
         """
         if 0 <= track_num < len(self.tracks):
             del self.tracks[track_num]
-            self._update_track_id_for_tracks()
         else:
             raise IndexError('track index out of range')
 
@@ -926,7 +920,8 @@ class MKVFile:
             flat_list.extend(MKVFile.flatten(item))
         return flat_list
 
-    def _update_track_id_for_tracks(self) -> None:
-        """An internal method to update the track_id for tracks in a file."""
+    def get_order_tracks(self) -> str:
+        text = ""
         for index, track in enumerate(self.tracks):
-            track._track_id = index
+            text += f"{index}:{track.track_id}"
+        return text
