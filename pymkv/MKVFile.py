@@ -127,7 +127,7 @@ class MKVFile:
                     new_track.flag_visual_impaired = track['properties']['flag_visual_impaired']
                 if 'flag_original' in track['properties']:
                     new_track.flag_original = track['properties']['flag_original']
-                self.add_track(new_track)
+                self.add_track(new_track, force_number_file=True)
 
         # split options
         self._split_options = []
@@ -325,13 +325,16 @@ class MKVFile:
         else:
             raise TypeError('track is not str or MKVFile')
 
-    def add_track(self, track):
+    def add_track(self, track, force_number_file: bool=None):
         """Add a track to the :class:`~pymkv.MKVFile`.
 
         Parameters
         ----------
         track : str, :class:`~pymkv.MKVTrack`
             The track to be added to the :class:`~pymkv.MKVFile` object.
+        force_number_file : bool, optional
+            If set to True, the file_id for the added track is not incremented. This can be used to preserve
+            original track numbering from a source file.
 
         Raises
         ------
@@ -340,16 +343,17 @@ class MKVFile:
         """
         if isinstance(track, str):
             new_track = MKVTrack(track, mkvmerge_path=self.mkvmerge_path)
-            self._extracted_from_add_track(new_track)
+            self._extracted_from_add_track(new_track, force_number_file)
         elif isinstance(track, MKVTrack):
-            self._extracted_from_add_track(track)
+            self._extracted_from_add_track(track, force_number_file)
         else:
             raise TypeError('track is not str or MKVTrack')
 
-    def _extracted_from_add_track(self, track: MKVTrack):
+    def _extracted_from_add_track(self, track: MKVTrack, force_number_file: bool = None):
         track.file_id = self._number_file
         self.tracks.append(track)
-        self._number_file += 1
+        if not force_number_file:
+            self._number_file += 1
 
     def add_attachment(self, attachment):
         """Add an attachment to the :class:`~pymkv.MKVFile`.
