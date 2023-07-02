@@ -174,7 +174,10 @@ class MKVFile:
         if self.title is not None:
             command.extend(['--title', self.title])
         track_order = []
-        # add tracks
+        unique_list_file = {track.file_path for track in self.tracks}
+        unique_list_file = list(unique_list_file)
+        for track in self.tracks:
+            track.file_id = unique_list_file.index(track.file_path)
         for track in self.tracks:
             # for track_order
             track_order.append(f'{track.file_id}:{track.track_id}')
@@ -236,8 +239,6 @@ class MKVFile:
 
             # add path
             command.append(track.file_path)
-
-            # command.append(f"--track-order {self.get_order_tracks()}")
 
         # add attachments
         for attachment in self.attachments:
@@ -943,9 +944,3 @@ class MKVFile:
         for item in item:
             flat_list.extend(MKVFile.flatten(item))
         return flat_list
-
-    def get_order_tracks(self) -> str:
-        text = ""
-        for index, track in enumerate(self.tracks):
-            text += f"{index}:{track.track_id}"
-        return text
