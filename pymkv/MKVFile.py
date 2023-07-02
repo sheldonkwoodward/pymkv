@@ -173,8 +173,11 @@ class MKVFile:
         command = [self.mkvmerge_path, '-o', output_path]
         if self.title is not None:
             command.extend(['--title', self.title])
+        track_order = []
         # add tracks
         for track in self.tracks:
+            # for track_order
+            track_order.append(f'{track.file_id}:{track.track_id}')
             # flags
             if track.track_name is not None:
                 command.extend(['--track-name', f'{str(track.track_id)}:{track.track_name}'])
@@ -268,6 +271,10 @@ class MKVFile:
         if self._link_to_next_file is not None:
             command.extend(['--link-to-next', f'={self._link_to_next_file}'])
 
+        # tracks order
+        if track_order:
+            command.extend(['--track-order', ','.join(track_order)])
+
         # split options
         command.extend(self._split_options)
 
@@ -305,9 +312,16 @@ class MKVFile:
             Raised if if `file` is not a string-like path to an MKV file or an :class:`~pymkv.MKVFile` object.
         """
         if isinstance(file, str):
-            self.tracks = self.tracks + MKVFile(file).tracks
+            new_tracks = MKVFile(file).tracks
+            for track in new_tracks:
+                track.file_id = self._number_file
+            self.tracks = self.tracks + new_tracks
+            self._number_file += 1
         elif isinstance(file, MKVFile):
+            for track in file.tracks:
+                track.file_id = self._number_file
             self.tracks = self.tracks + file.tracks
+            self._number_file += 1
         else:
             raise TypeError('track is not str or MKVFile')
 
@@ -325,11 +339,17 @@ class MKVFile:
             Raised if `track` is not a string-like path to a track file or an :class:`~pymkv.MKVTrack`.
         """
         if isinstance(track, str):
-            self.tracks.append(MKVTrack(track), mkvmerge_path=self.mkvmerge_path)
+            new_track = MKVTrack(track, mkvmerge_path=self.mkvmerge_path)
+            self._extracted_from_add_track(new_track)
         elif isinstance(track, MKVTrack):
-            self.tracks.append(track)
+            self._extracted_from_add_track(track)
         else:
             raise TypeError('track is not str or MKVTrack')
+
+    def _extracted_from_add_track(self, track: MKVTrack):
+        track.file_id = self._number_file
+        self.tracks.append(track)
+        self._number_file += 1
 
     def add_attachment(self, attachment):
         """Add an attachment to the :class:`~pymkv.MKVFile`.
