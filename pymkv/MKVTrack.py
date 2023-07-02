@@ -175,6 +175,27 @@ class MKVTrack:
         self.track_id = 0
 
     @property
+    def file_id(self):
+        """int: The ID of the file the track belongs to.
+
+        The file ID represents which file the current track is associated with. This is particularly useful
+        when handling multiple files.
+
+        Raises
+        ------
+        IndexError
+            Raised if the passed in index is out of range of the file's tracks.
+        """
+        return self._file_id
+
+    @file_id.setter
+    def file_id(self, file_id: int):
+        if isinstance(file_id, int):
+            self._file_id = file_id
+        else:
+            raise ValueError('file_id must be an integer')
+
+    @property
     def track_id(self):
         """int: The ID of the track within the file.
 
