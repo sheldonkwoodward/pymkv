@@ -273,8 +273,8 @@ class MKVFile:
             command.extend(['--link-to-next', f'={self._link_to_next_file}'])
 
         # tracks order
-        if track_order:
-            command.extend(['--track-order', ','.join(track_order)])
+        # if track_order:
+        #     command.extend(['--track-order', ','.join(track_order)])
 
         # split options
         command.extend(self._split_options)
