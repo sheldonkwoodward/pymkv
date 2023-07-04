@@ -1,7 +1,6 @@
 # pymkv
 [![PyPI Version](https://img.shields.io/pypi/v/pymkv.svg)](https://pypi.python.org/pypi/pymkv)
-[![License](https://img.shields.io/github/license/sheldonkwoodward/pymkv.svg)](https://github.com/sheldonkwoodward/pymkv/LICENSE.txt)
-[![Code Quality](https://api.codacy.com/project/badge/Grade/e1fe077d95f74a5886c557024777c26c)](https://api.codacy.com/project/badge/Grade/e1fe077d95f74a5886c557024777c26c)
+[![License](https://img.shields.io/github/license/sheldonkwoodward/pymkv.svg)](https://github.com/gitbib/pymkv/LICENSE.txt)
 
 pymkv is a Python wrapper for mkvmerge and other tools in the MKVToolNix suite. It provides support for muxing,
 splitting, linking, chapters, tags, and attachments through the use of mkvmerge.
@@ -25,17 +24,12 @@ You can also clone the repo and run the following command in the project root to
     $ pip install -e .
 
 ## Documentation
-The documentation for pymkv can be found [here](https://pymkv.shel.dev) or in the project's docstrings.
+The documentation for pymkv can be found [here](https://gitbib.github.io/pymkv/) or in the project's docstrings.
 
 ## Roadmap
 pymkv was a project started a few years ago when I was first learning Python. There were a number of things that I
 did that could use improvement. The planned changes and future features are outlined below. Keep an eye on the [Github
 Projects page](https://github.com/sheldonkwoodward/pymkv/projects) for the current roadmap status.
-
-### ~~Documentation~~
-The current documentation for pymkv is lacking. Instead of manually managing a GitHub Wiki, Sphinx will be setup to
-automatically generate documentation from docstrings. The docstrings will also need to be updated and improved to
-ensure this documentation is complete.
 
 ### Tests
 After completing documentation for the existing features, unit tests need to be written to "lock in" the existing
@@ -50,5 +44,5 @@ code base more readable and maintainable.
 ### Features
 Once these first three steps are complete, pymkv will be ready to start adding new features. The goal is for pymkv to
 implement the functionality of mkvmerge and other MKVToolNix tools as closely as possible. New features and bugs will
-be added to the [GitHub issues page](https://github.com/sheldonkwoodward/pymkv/issues). As pymkv progresses through
+be added to the [GitHub issues page](https://github.com/gitbib/pymkv/issues). As pymkv progresses through
 the previous steps, this roadmap will be expanded to outline new features.

@@ -13,7 +13,7 @@ The :class:`~pymkv.MKVTrack` class is used to add individual tracks to an :class
 
 Each module supports or mimics many of the same operations as mkvmerge but are not necessarily complete. If there is
 functionality that is missing or an error in the docs, please open a new issue `here <https://github
-.com/sheldonkwoodward/pymkv/issues>`_.
+.com/gitbib/pymkv/issues>`_.
 
 .. toctree::
     :maxdepth: 1
