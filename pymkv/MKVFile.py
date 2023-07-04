@@ -174,10 +174,6 @@ class MKVFile:
         if self.title is not None:
             command.extend(['--title', self.title])
         track_order = []
-        unique_list_file = {track.file_path for track in self.tracks}
-        unique_list_file = list(unique_list_file)
-        for track in self.tracks:
-            track.file_id = unique_list_file.index(track.file_path)
         for track in self.tracks:
             # for track_order
             track_order.append(f'{track.file_id}:{track.track_id}')
@@ -325,6 +321,7 @@ class MKVFile:
             self.tracks = self.tracks + file.tracks
         else:
             raise TypeError('track is not str or MKVFile')
+        self.order_tracks_by_file_id()
 
     def add_track(self, track, new_file: bool=True):
         """Add a track to the :class:`~pymkv.MKVFile`.
@@ -349,6 +346,7 @@ class MKVFile:
             self._extracted_from_add_track(track, new_file)
         else:
             raise TypeError('track is not str or MKVTrack')
+        self.order_tracks_by_file_id()
 
     def _extracted_from_add_track(self, track: MKVTrack, new_file: bool = False):
         if new_file:
@@ -408,6 +406,7 @@ class MKVFile:
         """
         if 0 <= track_num < len(self.tracks):
             self.tracks.insert(0, self.tracks.pop(track_num))
+            self.order_tracks_by_file_id()
         else:
             raise IndexError('track index out of range')
 
@@ -426,6 +425,7 @@ class MKVFile:
         """
         if 0 <= track_num < len(self.tracks):
             self.tracks.append(self.tracks.pop(track_num))
+            self.order_tracks_by_file_id()
         else:
             raise IndexError('track index out of range')
 
@@ -444,6 +444,7 @@ class MKVFile:
         """
         if 0 <= track_num < len(self.tracks) - 1:
             self.tracks[track_num], self.tracks[track_num + 1] = self.tracks[track_num + 1], self.tracks[track_num]
+            self.order_tracks_by_file_id()
         else:
             raise IndexError('track index out of range')
 
@@ -462,6 +463,7 @@ class MKVFile:
         """
         if 0 < track_num < len(self.tracks):
             self.tracks[track_num], self.tracks[track_num - 1] = self.tracks[track_num - 1], self.tracks[track_num]
+            self.order_tracks_by_file_id()
         else:
             raise IndexError('track index out of range')
 
@@ -482,6 +484,7 @@ class MKVFile:
         """
         if 0 <= track_num_1 < len(self.tracks) and 0 <= track_num_2 < len(self.tracks):
             self.tracks[track_num_1], self.tracks[track_num_2] = self.tracks[track_num_2], self.tracks[track_num_1]
+            self.order_tracks_by_file_id()
         else:
             raise IndexError('track index out of range')
 
@@ -502,6 +505,7 @@ class MKVFile:
         """
         if 0 <= track_num < len(self.tracks):
             self.tracks[track_num] = track
+            self.order_tracks_by_file_id()
         else:
             raise IndexError('track index out of range')
 
@@ -520,6 +524,7 @@ class MKVFile:
         """
         if 0 <= track_num < len(self.tracks):
             del self.tracks[track_num]
+            self.order_tracks_by_file_id()
         else:
             raise IndexError('track index out of range')
 
@@ -944,3 +949,19 @@ class MKVFile:
         for item in item:
             flat_list.extend(MKVFile.flatten(item))
         return flat_list
+
+    def order_tracks_by_file_id(self):
+        """
+        Orders tracks based on their file ID. Tracks from the same file will have the same file ID.
+
+        This method first generates a list of unique file paths from the existing tracks.
+        Then, it assigns each track a file ID, which is the index of its file path in the unique list.
+        As a result, tracks from the same file will have the same file ID.
+        """
+        unique_file_dict = {}
+        for track in self.tracks:
+            if track.file_path not in unique_file_dict:
+                unique_file_dict[track.file_path] = len(unique_file_dict)
+
+        for track in self.tracks:
+            track.file_id = unique_file_dict.get(track.file_path)
