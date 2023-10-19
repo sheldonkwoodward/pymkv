@@ -2,7 +2,6 @@
 bitmath==1.3.3.1
 iso-639==0.4.5
 git+https://github.com/GitBib/bcp47.py.git#egg=bcp47
-
 # doc dependencies
-Sphinx == 7.2.2
+Sphinx==7.2.6
 git+https://github.com/bashtage/sphinx-material.git
